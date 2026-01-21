@@ -3,10 +3,10 @@
     $env	= file_exists($env_file) ? require $env_file :  [ ];
 
     $database = [
-        'host' => $env [DB_HOST]  ?? ‘localhost’,
+        'host' => $env [DB_HOST]  ?? null,
         'name' => $env [DB_NAME]  ?? null,
-        'username' => $env [DB_USER]  ?? ‘root’,
-        'password' => $env [DB_PASS]  ?? ‘root’,
+        'username' => $env [DB_USER]  ?? null,
+        'password' => $env [DB_PASS]  ?? null,
     ];
 
     $connection = new mysqli(DB_SERVER, DB_USER, DB_PASS, DB_NAME);
