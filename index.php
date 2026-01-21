@@ -13,21 +13,7 @@
     <table>
         <tr>
             <?php
-                $stmt = $connection->prepare("SELECT `sku` FROM `products`");
-                $stmt->execute();
-                    $result = $stmt->get_result();
-                        if($result->num_rows > 0) {
-                            while ($row = $result->fetch_assoc()) {
-                                echo 
-                                "<table>
-                                    <tr>
-                                        <p>$row[sku]</p>
-                                    </tr>
-                                </table>
-                                ";
-                            }
-                        };
-                $stmt->close();
+                
             ?>
         </tr>
     </table>
