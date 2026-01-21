@@ -1,6 +1,7 @@
 <?php
-
+ require_once('db.php');
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,6 +10,12 @@
     <title>Document</title>
 </head>
 <body>
-    
+    <table>
+        <tr>
+            <?php
+                $stmt = $connection->prepare("SELECT `sku` FROM `products`");
+            ?>
+        </tr>
+    </table>
 </body>
 </html>
