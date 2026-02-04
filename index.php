@@ -39,13 +39,15 @@
                             echo "<td>" . htmlspecialchars($row['description']) . "</td>";
                             echo "<td>" . htmlspecialchars($row['uom_primary']) . "</td>";
                             echo "<td>" . htmlspecialchars($row['piece_count']) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['length_inches']) . "in </td>";
-                            echo "<td>" . htmlspecialchars($row['width_inches']) . "in </td>";
-                            echo "<td>" . htmlspecialchars($row['height_inches']) . "in </td>";
-                            echo "<td>" . htmlspecialchars($row['weight_lbs']) . "lb </td>";
+                            echo "<td>" . htmlspecialchars($row['length_inches']) . " in </td>";
+                            echo "<td>" . htmlspecialchars($row['width_inches']) . " in </td>";
+                            echo "<td>" . htmlspecialchars($row['height_inches']) . " in </td>";
+                            echo "<td>" . htmlspecialchars($row['weight_lbs']) . " lb </td>";
                             echo "<td>" . htmlspecialchars($row['assembly']) . "</td>";
                             echo "<td> $" . htmlspecialchars($row['rate']) . "</td>";
-                            echo "<td> <a href='edit.php?=" . htmlspecialchars($row['ID']) . "' class=''>Edit</a></td>";
+                            echo "<td> <a href='APIs/product-form.php?id=" . htmlspecialchars($row['ID']) . "' class=''>Edit</a>
+                            |
+                            <a href='APIs/product-delete.php?id=" . htmlspecialchars($row['ID']) . "' class=''>Delete</a></td>";
                             echo "</tr>";
                         }
                     };
@@ -56,10 +58,6 @@
         <table class="data_tb">
             <tr>
                 <th>Select</th>
-                <th>Order Number</th>
-                <th>Shipment Number</th>
-                <th>Bill Number</th>
-                <th>Purchase Number</th>
                 <th>Unit Number</th>
                 <th>Ficha</th>
                 <th>Description 1</th>
@@ -74,10 +72,6 @@
                         foreach($result as $row){
                             echo "<tr>";
                             echo "<td> <input type='checkbox' value='selected'> </td>";
-                            echo "<td>" . htmlspecialchars($row['order_numb']) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['shipment_numb']) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['bill_numb']) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['purchase_numb']) . "</td>";
                             echo "<td>" . htmlspecialchars($row['unit_numb']) . "</td>";
                             echo "<td>" . htmlspecialchars($row['ficha']) . "</td>";
                             echo "<td>" . htmlspecialchars($row['description_1']) . "</td>";
@@ -90,5 +84,9 @@
                     }
             ?>
         </table>
+
+    <div>
+        <form action=""></form>
+    </div>
 </body>
 </html>
