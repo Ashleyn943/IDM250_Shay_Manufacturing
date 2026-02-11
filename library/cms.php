@@ -1,80 +1,70 @@
 <?php
-    header('Content-Type: application/json');
-    header('Access-Control_Allow_Origin: *');
+    // header('Content-Type: application/json');
+    // header('Access-Control-Allow-Origin: *');
 
-    require_once('.../db_connect.php');
-    require_once('/auth.php');
+    require_once('../db_connect.php');
+    // require_once('/auth.php');
 
-    check_api_key($env);
+    // check_api_key($env);
 
     $method=$_SERVER['REQUEST_METHOD'];
     $id = intval(basename($_SERVER['REQUEST_URI']));
 
-    //GET via product ID
-    if(!isset($id)) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Bad Request', 'details' => 'Missing ID']);
-        exit;
+    //add new product
+    if(isset($_POST['add_btn'])){
+        $sku = $_POST['sku'];
+        $ficha = $_POST['ficha'];
+        $description = $_POST['description'];
+        $rate = $_POST['rate'];
+        $length_inches = $_POST['length_inches'];
+        $width_inches = $_POST['width_inches'];
+        $height_inches = $_POST['height_inches'];
+        $weight_lbs = $_POST['weight_lbs'];
+        $uom_primary = $_POST['uom_primary'];
+        $piece_count = $_POST['piece_count'];
+        $assembly = $_POST['assembly'];
+
+        $stmt1 = $connection->prepare("INSERT INTO products (sku, ficha, description, rate) VALUES (?, ?, ?, ?)");
+        $stmt1->bind_param("iisd", $sku, $ficha, $description, $rate);
+        $stmt2 = $connection->prepare("INSERT INTO products_dimensions (length_inches, width_inches, height_inches, weight_lbs) VALUES (?, ?, ?, ?)");
+        $stmt2->bind_param("dddd", $length_inches, $width_inches, $height_inches, $weight_lbs);
+        $stmt3 = $connection->prepare("INSERT INTO products_types (uom_primary, piece_count, assembly) VALUES (?, ?, ?)");
+        $stmt3->bind_param("sis", $uom_primary, $piece_count, $assembly);
+        
+        if($stmt1->execute() && $stmt2->execute() && $stmt3->execute()){
+            echo "Product added successfully";
+            header("Location: ../index.php");
+        } else {
+            echo "Failed to add product";
+        }
     };
 
-    if ($method === 'GET') :
-        function get_product($connection, $id) {
-            $stmt = $connection -> prepare('SELECT * FROM products WHERE id = ? LIMIT 1');
-            $stmt -> bind_param('i', $id);
-            $stmt -> execute();
+    //update existing product
+    if(isset($_POST['update_btn'])){
+        $id = intval($_GET['id']);
+        $sku = $_POST['sku'];
+        $ficha = $_POST['ficha'];
+        $description = $_POST['description'];
+        $rate = $_POST['rate'];
+        $length_inches = $_POST['length_inches'];
+        $width_inches = $_POST['width_inches'];
+        $height_inches = $_POST['height_inches'];
+        $weight_lbs = $_POST['weight_lbs'];
+        $uom_primary = $_POST['uom_primary'];
+        $piece_count = $_POST['piece_count'];
+        $assembly = $_POST['assembly'];
 
-            $result = $stmt -> get_result();
-            $product = $result -> fetch_assoc();
-
-            if($product) {
-                $vars_query = $connection -> prepare('SELECT * FROM product_variants WHERE product_id = ?');
-                $vars_query -> bind_param('i', $id);
-                $vars_query -> execute();
-
-                $vars_result = $vars_query -> get_result();
-                $vars = $vars_result -> fetch_assoc();
-
-                $product['variants'] = $vars;
-
-                echo json_encode(['success' => true, 'data' => $product]);
-            } else {
-                http_response_code(404);
-                echo json_encode(['error' => 'Not Found', 'details' => 'Product Not Found']);
-            }
-        };
-    elseif ($method === 'PUT') :
-        function update_product($connection, $id) {
-            $data = json_decode(file_get_contents('php://input'), true);
-
-            if (!isset($data['name'])) {
-                http_response_code(400);
-                echo json_encode(['error' => 'Bad Request', 'details' => 'Missing Required fields']);
-                exit;
-            }
-
-            //changing data (in this case data name)
-            $name = $connection -> real_escape_string($data['name']);
-            $stmt = $connection -> prepare('UPDATE products SET name = ? WHERE id = ? LIMIT 1');
-            $stmt -> bind_param('si', $name, $id);
-
-            if ($stmt -> execute()) {
-                echo json_encode(['success' => true]);
-            } else {
-                http_response_code(500);
-                echo json_encode(['error' => 'Internal Server Error']);
-            }
-        };
-    elseif ($method === 'DELETE') :
-        function delete_product($connection, $id) {
-            $stmt = $connection -> prepare('DELETE FROM products WHERE id = ? LIMIT 1');
-            $stmt -> bind_param('i', $id);
-
-            if ($stmt -> execute()) {
-                http_response_code(204);
-            } else {
-                http_response_code(500);
-                echo json_encode(['error' => 'Internal Server Error']);
-            }
-        };
-    endif;
-?>
+        $stmt1 = $connection->prepare("UPDATE products SET sku=?, ficha=?, description=?, rate=? WHERE id=$id");
+        $stmt1->bind_param("iisd", $sku, $ficha, $description, $rate);
+        $stmt2 = $connection->prepare("UPDATE products_dimensions SET length_inches=?, width_inches=?, height_inches=?, weight_lbs=? WHERE id=$id");
+        $stmt2->bind_param("dddd", $length_inches, $width_inches, $height_inches, $weight_lbs);
+        $stmt3 = $connection->prepare("UPDATE products_types SET uom_primary=?, piece_count=?, assembly=? WHERE id=$id");
+        $stmt3->bind_param("sis", $uom_primary, $piece_count, $assembly);
+        
+        if($stmt1->execute() && $stmt2->execute() && $stmt3->execute()){
+            echo "Product updated successfully";
+            header("Location: ../index.php");
+        } else {
+            echo "Failed to update product";
+        }
+    };

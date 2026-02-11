@@ -28,9 +28,8 @@
             </div>
     
             <div>
-                <button type="submit"><?php echo $id ? 'Update Product' : 'Add Product'; ?> Submit</button>
+                <button type="submit" name="send_list">Submit</button>
             </div>
-        </form>
         <table class="data_tb">
             <tr>
                 <th>Select</th>
@@ -60,6 +59,7 @@
                     }
             ?>
         </table>
+        </form>
     </table>
 </body>
 </html>
