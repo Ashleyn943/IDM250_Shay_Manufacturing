@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Feb 04, 2026 at 04:34 PM
+-- Generation Time: Feb 11, 2026 at 03:28 AM
 -- Server version: 5.7.24
 -- PHP Version: 8.3.1
 
@@ -210,7 +210,27 @@ INSERT INTO `products` (`id`, `ficha`, `sku`, `description`, `rate`) VALUES
 (8, 445, '1720830-0789', 'ALDER RED SEL 4/4 RGH KD 8-10FT', '17.64'),
 (9, 127, '1720831-0345', 'WHITE OAK QS 4/4 RGH KD 10FT', '22.40'),
 (10, 568, '1720832-0612', 'SOUTHERN PINE PT 4X4X12FT GC', '13.28'),
-(11, 724, '1720813-0132', 'MDF ST LX C2-- 2465X1245X05.7MM P/EF/132', '15.16');
+(11, 724, '1720813-0132', 'MDF ST LX C2-- 2465X1245X05.7MM P/EF/132', '15.16'),
+(12, 987, '1720814-0248', 'PINE CLR VG 2X4X8FT KD SELECT', '16.18'),
+(13, 337, '1720815-0156', 'OAK RED FAS 4/4 RGH KD 8-12FT', '15.16'),
+(14, 778, '1720816-0089', 'SPRUCE DIMENSION 2X6X12FT #2BTR', '14.50'),
+(15, 187, '1720817-0234', 'CEDAR WRC CVG 1X6X8FT CLR S4S', '20.06'),
+(16, 223, '1720818-0167', 'MAPLE HARD FAS 5/4 RGH KD 10FT', '16.18'),
+(17, 876, '1720819-0312', 'PLYWOOD BALTIC BIRCH 3/4X4X8', '17.02'),
+(18, 233, '1720820-0098', 'POPLAR FAS 4/4 RGH KD 8-14FT', '16.14'),
+(19, 991, '1720821-0445', 'WALNUT BLK FAS 4/4 RGH KD 8FT', '12.14'),
+(20, 901, '1720822-0223', 'DOUGLAS FIR CVG 2X10X16FT #1', '16.18'),
+(21, 547, '1720823-0011', 'PINE #2 2X4X10FT KD', '15.80'),
+(22, 819, '1720824-0025', 'SPRUCE 2X6X10FT #2', '14.90'),
+(23, 312, '1720825-0039', 'OAK RED 4/4 FAS KD 9FT', '16.50'),
+(24, 694, '1720826-0052', 'MAPLE HARD 5/4 FAS KD 12FT', '17.20'),
+(25, 128, '1720827-0067', 'POPLAR 4/4 FAS KD 10FT', '15.90'),
+(26, 451, '1720828-0081', 'WALNUT 4/4 FAS KD 10FT', '13.40'),
+(27, 273, '1720829-0094', 'DOUGLAS FIR 2X8X12FT #2', '16.00'),
+(28, 886, '1720830-0108', 'CEDAR WRC 1X8X10FT CLR S4S', '19.50'),
+(29, 409, '1720831-0122', 'PLYWOOD BIRCH 1/2X4X8', '16.80'),
+(30, 762, '1720832-0136', 'MDF ST LX C3 2440X1220X18MM P/E', '15.40'),
+(31, 452, '450', 'BIRCH YEL FAS 6/4 RGH KD 10FT', '18.22');
 
 -- --------------------------------------------------------
 
@@ -220,10 +240,10 @@ INSERT INTO `products` (`id`, `ficha`, `sku`, `description`, `rate`) VALUES
 
 CREATE TABLE `products_dimensions` (
   `id` int(2) NOT NULL,
-  `length_inches` int(3) DEFAULT NULL,
-  `width_inches` int(2) DEFAULT NULL,
-  `height_inches` decimal(3,1) DEFAULT NULL,
-  `weight_lbs` decimal(6,2) DEFAULT NULL
+  `length_inches` float(10,2) DEFAULT NULL,
+  `width_inches` float(10,2) DEFAULT NULL,
+  `height_inches` float(10,2) DEFAULT NULL,
+  `weight_lbs` float(10,2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -231,16 +251,37 @@ CREATE TABLE `products_dimensions` (
 --
 
 INSERT INTO `products_dimensions` (`id`, `length_inches`, `width_inches`, `height_inches`, `weight_lbs`) VALUES
-(1, 120, 44, '34.0', '3120.45'),
-(2, 168, 40, '28.5', '2975.30'),
-(3, 132, 46, '40.0', '3540.60'),
-(4, 96, 48, '52.0', '4250.75'),
-(5, 96, 42, '26.0', '1980.20'),
-(6, 120, 38, '32.0', '2430.85'),
-(7, 97, 49, '45.0', '3890.40'),
-(8, 120, 40, '30.0', '2180.55'),
-(9, 120, 48, '38.0', '2890.70'),
-(10, 144, 44, '48.0', '5120.35');
+(1, 120.00, 44.00, 34.00, 3120.45),
+(2, 168.00, 40.00, 28.50, 2975.30),
+(3, 132.00, 46.00, 40.00, 3540.60),
+(4, 96.00, 48.00, 52.00, 4250.75),
+(5, 96.00, 42.00, 26.00, 1980.20),
+(6, 120.00, 38.00, 32.00, 2430.85),
+(7, 97.00, 49.00, 45.00, 3890.40),
+(8, 120.00, 40.00, 30.00, 2180.55),
+(9, 120.00, 48.00, 38.00, 2890.70),
+(10, 144.00, 44.00, 48.00, 5120.35),
+(11, 96.00, 39.00, 29.70, 3945.22),
+(12, 96.00, 42.00, 36.00, 2850.50),
+(13, 120.00, 48.00, 42.00, 4125.75),
+(14, 144.00, 36.00, 30.00, 3280.00),
+(15, 96.00, 36.00, 24.00, 1890.25),
+(16, 120.00, 48.00, 38.00, 3750.80),
+(17, 96.00, 48.00, 36.00, 2980.00),
+(18, 144.00, 42.00, 32.00, 2650.40),
+(19, 96.00, 48.00, 28.00, 2240.60),
+(20, 192.00, 48.00, 40.00, 4580.90),
+(21, 120.00, 42.00, 36.00, 3100.00),
+(22, 120.00, 36.00, 30.00, 2950.00),
+(23, 108.00, 48.00, 40.00, 4200.00),
+(24, 144.00, 48.00, 38.00, 3950.00),
+(25, 120.00, 42.00, 34.00, 2800.00),
+(26, 120.00, 48.00, 30.00, 2550.00),
+(27, 144.00, 48.00, 36.00, 3850.00),
+(28, 120.00, 36.00, 28.00, 2100.00),
+(29, 96.00, 48.00, 34.00, 2650.00),
+(30, 96.00, 48.00, 36.00, 4200.00),
+(31, 120.00, 44.00, 34.00, 3120.45);
 
 -- --------------------------------------------------------
 
@@ -250,7 +291,7 @@ INSERT INTO `products_dimensions` (`id`, `length_inches`, `width_inches`, `heigh
 
 CREATE TABLE `products_types` (
   `id` int(2) NOT NULL,
-  `uom_primary` varchar(6) DEFAULT NULL,
+  `uom_primary` text,
   `piece_count` int(3) DEFAULT NULL,
   `assembly` varchar(5) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -269,7 +310,28 @@ INSERT INTO `products_types` (`id`, `uom_primary`, `piece_count`, `assembly`) VA
 (7, 'PALLET', 60, 'FALSE'),
 (8, 'BUNDLE', 140, 'FALSE'),
 (9, 'PALLET', 65, 'FALSE'),
-(10, 'BUNDLE', 130, 'FALSE');
+(10, 'BUNDLE', 130, 'FALSE'),
+(11, 'BUNDLE', 250, 'FALSE'),
+(12, 'BUNDLE', 200, 'FALSE'),
+(13, 'PALLET', 150, 'FALSE'),
+(14, 'BUNDLE', 180, 'FALSE'),
+(15, 'BUNDLE', 300, 'FALSE'),
+(16, 'PALLET', 120, 'FALSE'),
+(17, 'PALLET', 45, 'FALSE'),
+(18, 'BUNDLE', 175, 'FALSE'),
+(19, 'PALLET', 20, 'FALSE'),
+(20, 'BUNDLE', 220, 'FALSE'),
+(21, 'BUNDLE', 190, 'FALSE'),
+(22, 'PALLET', 140, 'FALSE'),
+(23, 'PALLET', 110, 'FALSE'),
+(24, 'BUNDLE', 160, 'FALSE'),
+(25, 'PALLET', 90, 'FALSE'),
+(26, 'BUNDLE', 130, 'FALSE'),
+(27, 'BUNDLE', 280, 'FALSE'),
+(28, 'PALLET', 60, 'FALSE'),
+(29, 'BUNDLE', 180, 'FALSE'),
+(30, 'BUNDLE', 100, 'FALSE'),
+(31, 'PALLET', 95, 'FALSE');
 
 --
 -- Indexes for dumped tables
@@ -337,19 +399,19 @@ ALTER TABLE `inventory_ship_info`
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(2) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(2) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT for table `products_dimensions`
 --
 ALTER TABLE `products_dimensions`
-  MODIFY `id` int(2) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(2) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT for table `products_types`
 --
 ALTER TABLE `products_types`
-  MODIFY `id` int(2) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(2) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
