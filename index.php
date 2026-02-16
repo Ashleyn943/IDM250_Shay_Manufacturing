@@ -14,6 +14,7 @@
     <title>Table Practice</title>
 </head>
 <body>
+    <a href="mpl.php">MPL Page</a>
     <h1>Products</h1>
         <a href="APIs/product-new.php">Add New Product</a>
         <table class="data_tb">
@@ -55,39 +56,5 @@
             ?>
         </table>
     <br><br>
-    <h1>Current Stock</h1>
-        <table class="data_tb">
-            <tr>
-                <th>Select</th>
-                <th>Unit Number</th>
-                <th>Ficha</th>
-                <th>Description 1</th>
-                <th>Description 2</th>
-                <th>Quantity</th>
-                <th>Quantity Unit</th>
-                <th>Footage Quantity</th>
-            </tr>
-            <?php
-                $result = mysqli_query($connection, "SELECT * FROM inventory_item_info");
-                    if($row = mysqli_num_rows($result)){
-                        foreach($result as $row){
-                            echo "<tr>";
-                            echo "<td> <input type='checkbox' name='".$row['inventory_id'] ."' value='selected'> </td>";
-                            echo "<td>" . htmlspecialchars($row['unit_numb'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['ficha'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['description_1'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['description_2'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['quantity'] ?? 0) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['quantity_unit'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['footage_quantity'] ?? 0) . "</td>";
-                            echo "</tr>";
-                        }   
-                    }
-            ?>
-        </table>
-
-    <div>
-        <form action=""></form>
-    </div>
 </body>
 </html>

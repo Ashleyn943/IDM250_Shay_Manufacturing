@@ -2,7 +2,7 @@
     // header('Content-Type: application/json');
     // header('Access-Control-Allow-Origin: *');
 
-    require_once('../db_connect.php');
+    require_once('./db_connect.php');
     // require_once('/auth.php');
 
     // check_api_key($env);
@@ -33,6 +33,7 @@
         
         if($stmt1->execute() && $stmt2->execute() && $stmt3->execute()){
             echo "Product added successfully";
+            $inserted_id = $connection->insert_id;
             header("Location: ../index.php");
         } else {
             echo "Failed to add product";
@@ -67,4 +68,30 @@
         } else {
             echo "Failed to update product";
         }
+    };
+
+    //delete product
+
+
+    //sending selected inventory items to shipping list
+    if(isset($_POST['send_list'])){
+        $selected_items = isset($_POST['selected_items']) && !empty($_POST['selected_items']) ? $_POST['selected_items'] : [];
+        $reference = $_POST['reference'];
+        $date = $_POST['date'];
+        $trailer = $_POST['truck'];
+
+        foreach($selected_items as $key => $shipID){
+            $sql = "SELECT DISTINCT sku, unit_numb, ficha, description1, description2, quantity, quantity_unit, footage_quantity FROM inventory_item_info WHERE inventory_id = $shipID";
+            $result = mysqli_query($connection, $sql);
+            $row = mysqli_fetch_assoc($result);
+
+            if(!empty($row)){
+                $stmt = $connection->prepare("INSERT INTO mpl_shipping_list (sku, unit_numb, ficha, description1, description2, quantity, quantity_unit, footage_quantity, reference_numb, ship_date, trailer_name, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'draft')");
+                $stmt->bind_param("iiissisiiss", $row['sku'], $row['unit_numb'], $row['ficha'], $row['description1'], $row['description2'], $row['quantity'], $row['quantity_unit'], $row['footage_quantity'], $reference, $date, $trailer);
+                $stmt->execute();
+            };
+
+            $stmt= $connection->prepare("UPDATE inventory_item_info SET `location`='warehouse' WHERE inventory_id=$shipID");
+            $stmt->execute();
+        };
     };
