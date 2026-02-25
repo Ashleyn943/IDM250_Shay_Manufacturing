@@ -17,13 +17,10 @@ body {
     width: 100%;
     border-collapse: collapse;
 }
-<<<<<<< Updated upstream
-=======
 
 h1, h2 {
     margin-bottom: 1rem;
 }
->>>>>>> Stashed changes
 
 td, th {
     border: 1px solid #ddd;
