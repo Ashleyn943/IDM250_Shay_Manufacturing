@@ -1,7 +1,6 @@
 <?php
     //header('Content-Type: application/json');
     //header('Access-Control-Allow-Origin: *');
-    include('header.php');
     require_once('db_connect.php');
 
     // Fetch counts for the summary cards
@@ -16,9 +15,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/stylesheet.css">
     <link rel="stylesheet" href="css/nav.css">
+    <link rel="icon" href="media/ShayIcon.png" type="image/x-icon">
     <title>Table Practice</title>
 </head>
 <body>
+    <?php include('header.php'); ?>
 
     <div class="dashboard-container">
     <h1>Dashboard</h1>

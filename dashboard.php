@@ -1,6 +1,5 @@
 <?php
     require_once('db_connect.php');
-    include_once('header.php');
 
     // Fetch counts for the summary cards
     $sku_count = mysqli_num_rows(mysqli_query($connection, "SELECT id FROM products"));
@@ -14,8 +13,10 @@
     <title>Dashboard</title>
     <link rel="stylesheet" href="css/stylesheet.css">
     <link rel="stylesheet" href="css/nav.css">
+    <link rel="icon" href="media/ShayIcon.png" type="image/x-icon">
 </head>
 <body>
+    <?php include_once('header.php'); ?>
     <div class="dashboard-container">
     <h1>Dashboard</h1>
 

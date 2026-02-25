@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="icon" href="../media/ShayIcon.png" type="image/x-icon">
 </head>
 <body>
     <h1><?php echo isset($_GET['ID']) ? 'Edit Product' : 'Add New Product'; ?></h1>

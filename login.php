@@ -17,6 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     <title>CMS Login</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="normalize.css">
+    <link rel="icon" href="media/ShayIcon.png" type="image/x-icon">
 </head>
 
 <body class="login-body">

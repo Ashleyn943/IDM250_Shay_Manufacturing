@@ -6,7 +6,6 @@ error_reporting(E_ALL);
     // require_once('library/auth.php');
     // require_once('library/cms.php');
     require_once('db_connect.php');
-    include('header.php');
 ?>
 
 <!DOCTYPE html>
@@ -16,9 +15,21 @@ error_reporting(E_ALL);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/stylesheet.css">
     <link rel="stylesheet" href="css/nav.css">
+    <link rel="icon" href="media/ShayIcon.png" type="image/x-icon">
     <title>Shipping List</title>
 </head>
 <body>
+    <?php include('header.php'); ?>
+    <div class="dashboard-container">
+    <?php if (isset($_GET['status']) && $_GET['status'] === 'success') { ?>
+        <div class="status-banner status-success">
+            Shipping list saved. Selected items were added to the MPL shipping list.
+        </div>
+    <?php } elseif (isset($_GET['status']) && $_GET['status'] === 'missing') { ?>
+        <div class="status-banner status-warning">
+            Please select at least one item and fill out all fields before submitting.
+        </div>
+    <?php } ?>
     <div class="form-section">
         <h1>Select Stock to be Shipped</h1>
         <form method="POST" action="library/cms.php">
@@ -77,5 +88,6 @@ error_reporting(E_ALL);
             </div>
         </form>
     </div>
+</div>
 </body>
 </html>

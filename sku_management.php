@@ -1,6 +1,5 @@
 <?php 
     require_once('db_connect.php');
-    include('header.php');
 ?>
 
 <!DOCTYPE html>
@@ -12,8 +11,10 @@
     <link rel="stylesheet" href="css/stylesheet.css">
     <link rel="stylesheet" href="css/nav.css">
     <link rel="stylesheet" href="css/normalize.css">
+    <link rel="icon" href="media/ShayIcon.png" type="image/x-icon">
 </head>
 <body>
+    <?php include('header.php'); ?>
     <div class="Products">
         <h1>Products</h1>
         <a href="APIs/product-new.php" class="btn">Add New Product</a>

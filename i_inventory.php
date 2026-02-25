@@ -1,6 +1,5 @@
 <?php
 	require_once('db_connect.php');
-	include('header.php');
 
     $inventory_count = mysqli_num_rows(mysqli_query($connection, "SELECT inventory_id FROM inventory_item_info"));
 ?>
@@ -14,8 +13,10 @@
 	<link rel="stylesheet" href="css/stylesheet.css">
 	<link rel="stylesheet" href="css/nav.css">
 	<link rel="stylesheet" href="css/normalize.css">
+	<link rel="icon" href="media/ShayIcon.png" type="image/x-icon">
 </head>
 <body>
+	<?php include('header.php'); ?>
 	<div class="dashboard-container">
 		<h1>Internal Inventory</h1>
 

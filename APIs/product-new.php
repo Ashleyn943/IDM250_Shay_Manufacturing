@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="../css/stylesheet.css"> 
     <link rel="stylesheet" href="../css/nav.css">
     <link rel="stylesheet" href="../css/normalize.css">
+    <link rel="icon" href="../media/ShayIcon.png" type="image/x-icon">
 
 </head>
 <body>

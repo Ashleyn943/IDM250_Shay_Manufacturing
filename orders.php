@@ -4,7 +4,6 @@
     error_reporting(E_ALL);
     
     require_once('db_connect.php');
-    include('header.php');
 ?>
 
 <!DOCTYPE html>
@@ -15,9 +14,11 @@
     <link rel="stylesheet" href="css/stylesheet.css">
     <link rel="stylesheet" href="css/nav.css">
     <link rel="stylesheet" href="css/normalize.css">
+    <link rel="icon" href="media/ShayIcon.png" type="image/x-icon">
     <title>Order Request</title>
 </head>
 <body>
+    <?php include('header.php'); ?>
     <div class="form-section">
         <h1>Select Stock for Order</h1>
         <form method="POST">
