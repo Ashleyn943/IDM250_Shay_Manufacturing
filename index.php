@@ -6,6 +6,7 @@
 
     // Fetch counts for the summary cards
     $sku_count = mysqli_num_rows(mysqli_query($connection, "SELECT id FROM products"));
+    $inventory_count = mysqli_num_rows(mysqli_query($connection, "SELECT inventory_id FROM inventory_item_info"));
 ?>
 
 <!DOCTYPE html>
@@ -29,7 +30,7 @@
         </div>
         <div class="card">
             <h3>Internal Inventory</h3>
-            <p class="stat-number">100</p>
+            <p class="stat-number"><?php echo $inventory_count; ?></p>
         </div>
         <div class="card">
             <h3>Warehouse Inventory</h3>
@@ -55,48 +56,6 @@
         <h2>Recent Orders</h2>
         <p class="empty-msg">No order records found.</p>
     </div>
-</div>
-
-    <h1>Products</h1>
-        <a href="APIs/product-new.php" class="btn">Add New Product</a>
-        <table class="data_tb">
-            <tr>
-                <th>ID</th>
-                <th>Sku</th>
-                <th>Description</th>
-                <th>Unit of Measure</th>
-                <th>Piece Count</th>
-                <th>Length</th>
-                <th>Width</th>
-                <th>Height</th>
-                <th>Weight</th>
-                <th>Assembly</th>
-                <th>Price Rate</th>
-                <th>Actions</th>
-            <?php
-                $result = mysqli_query($connection, "SELECT * FROM products p INNER JOIN products_dimensions pd ON p.id = pd.id INNER JOIN products_types pt ON p.id = pt.id");
-                    if($row = mysqli_num_rows($result)){
-                        foreach($result as $row){
-                            echo "<tr>";
-                            echo "<td>" . htmlspecialchars($row['ficha'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['sku']) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['description']) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['uom_primary'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['piece_count'] ?? 0) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['length_inches'] ?? 0) . " in </td>";
-                            echo "<td>" . htmlspecialchars($row['width_inches'] ?? 0) . " in </td>";
-                            echo "<td>" . htmlspecialchars($row['height_inches'] ?? 0) . " in </td>";
-                            echo "<td>" . htmlspecialchars($row['weight_lbs'] ?? 0) . " lb </td>";
-                            echo "<td>" . htmlspecialchars($row['assembly'] ?? '') . "</td>";
-                            echo "<td> $" . htmlspecialchars($row['rate'] ?? 0) . "</td>";
-                            echo "<td> <a href='APIs/product-update.php?id=" . htmlspecialchars($row['id'] ?? 0) . "' class=''>Edit</a>
-                            |
-                            <a href='APIs/product-delete.php?id=" . htmlspecialchars($row['id'] ?? 0) . "' class=''>Delete</a></td>";
-                            echo "</tr>";
-                        }
-                    };
-            ?>
-        </table>
-    <br><br>
+    </div>
 </body>
 </html>

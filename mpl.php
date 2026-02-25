@@ -19,25 +19,25 @@ error_reporting(E_ALL);
     <title>Shipping List</title>
 </head>
 <body>
+    <div class="form-section">
         <h1>Select Stock to be Shipped</h1>
-        <form method="POST">
-            <div>
+        <form method="POST" action="library/cms.php">
+            <div class="form-group">
                 <label for="reference">Reference Number</label>
-                <input type="number" name="reference" required>
+                <input type="number" id="reference" name="reference" required>
             </div>
-            <div>
+            <div class="form-group">
                 <label for="date">Expected Arrival Date:</label>
-                <input type="date" name="date" required>
+                <input type="date" id="date" name="date" required>
             </div>
-            <div>
+            <div class="form-group">
                 <label for="truck">Trailer name:</label>
-                <input type="text" name="truck" required>
+                <input type="text" id="truck" name="truck" required>
             </div>
-    
-            <div>
-                <button type="submit" name="send_list">Submit</button>
-            </div>
-        <table class="data_tb">
+
+            <div class="table-container">
+                <h2>Inventory Items</h2>
+                <table class="data_tb">
             <tr>
                 <th>Select</th>
                 <th>SKU</th>
@@ -69,7 +69,13 @@ error_reporting(E_ALL);
                         }   
                     }
             ?>
-        </table>
-    </form>
+                </table>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" name="send_list" class="btn-form">Submit</button>
+            </div>
+        </form>
+    </div>
 </body>
 </html>

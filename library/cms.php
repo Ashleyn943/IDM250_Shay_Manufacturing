@@ -94,22 +94,27 @@
     //sending selected inventory items to shipping list
     if(isset($_POST['send_list'])){
         $selected_items = isset($_POST['selected_items']) && !empty($_POST['selected_items']) ? $_POST['selected_items'] : [];
-        $reference = $_POST['reference'];
-        $date = $_POST['date'];
-        $trailer = $_POST['truck'];
+        $reference = isset($_POST['reference']) ? intval($_POST['reference']) : 0;
+        $date = isset($_POST['date']) ? $_POST['date'] : null;
+        $trailer = isset($_POST['truck']) ? $_POST['truck'] : '';
 
-        foreach($selected_items as $key => $shipID){
-            $sql = "SELECT DISTINCT sku, unit_numb, ficha, description1, description2, quantity, quantity_unit, footage_quantity FROM inventory_item_info WHERE inventory_id = $shipID";
-            $result = mysqli_query($connection, $sql);
-            $row = mysqli_fetch_assoc($result);
+        if (!empty($selected_items) && $reference && $date && $trailer) {
+            $insert = $connection->prepare(
+                "INSERT INTO mpl_shipping_list (item_id, reference_numb, ship_date, trailer_name, status) VALUES (?, ?, ?, ?, 'draft')"
+            );
+            $update = $connection->prepare(
+                "UPDATE inventory_item_info SET `location`='warehouse' WHERE inventory_id=?"
+            );
 
-            if(!empty($row)){
-                $stmt = $connection->prepare("INSERT INTO mpl_shipping_list (sku, unit_numb, ficha, description1, description2, quantity, quantity_unit, footage_quantity, reference_numb, ship_date, trailer_name, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'draft')");
-                $stmt->bind_param("iiissisiiss", $row['sku'], $row['unit_numb'], $row['ficha'], $row['description1'], $row['description2'], $row['quantity'], $row['quantity_unit'], $row['footage_quantity'], $reference, $date, $trailer);
-                $stmt->execute();
+            foreach($selected_items as $shipID){
+                $item_id = intval($shipID);
+                $insert->bind_param("iiss", $item_id, $reference, $date, $trailer);
+                $insert->execute();
+
+                if ($update) {
+                    $update->bind_param("i", $item_id);
+                    $update->execute();
+                }
             };
-
-            $stmt= $connection->prepare("UPDATE inventory_item_info SET `location`='warehouse' WHERE inventory_id=$shipID");
-            $stmt->execute();
-        };
+        }
     };

@@ -7,15 +7,23 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Delete Confirmation</title>
+    <title>Delete Confirmation | Shay Manufacturing</title>
+    <link rel="stylesheet" href="../css/styles.css"> 
+    <link rel="stylesheet" href="../css/normalize.css">
+    <link rel="stylesheet" href="../css/stylesheet.css">
 </head>
 <body>
-    <h1>Are you sure you want to delete product #<?php echo $id; ?>?</h1>
-    <p>This action cannot be undone.</p>
-    
-    <form action="../library/cms.php?id=<?php echo $id; ?>" method="POST">
-        <button type="submit" name="delete_btn">Confirm Delete</button>
-        <a href="../index.php">Cancel</a>
-    </form>
+    <div class="login-body">
+        <div class="login-container">
+            <div class="login-header">
+                <h1>Confirm Deletion</h1>
+                <p>Are you sure you want to delete this product?</p>
+            </div>
+            <form action="../library/cms.php?id=<?php echo $id; ?>" method="POST">
+                <button type="submit" name="delete_btn" class="btn">Confirm Delete</button>
+                <button type="button" style="margin-top: 10px;" class="btn" onclick="window.location.href='../sku_management.php'">Cancel</button>
+            </form>
+        </div>
+    </div>
 </body>
 </html>
