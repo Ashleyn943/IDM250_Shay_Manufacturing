@@ -9,18 +9,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/stylesheet.css">
-    <title>Creating Shipping List</title>
+    <title>Order Request</title>
 </head>
 <body>
-    <a href="index.php">Return to Main Menu</a> | <a href="mpl_items.php">View Items on Master Packing List</a> | <a href="order.php">Create Order List</a> 
-        <h1>Select Stock to be Shipped</h1>
+    <a href="index.php">Return to Main Menu</a> | <a href="mpl_items.php">View Items on Master Packing List</a> | <a href="order_items.php">View Order List</a> 
+        <h1>Select Stock for Order</h1>
         <form method="POST">
             <div>
                 <label for="reference">Reference Number</label>
                 <input type="number" name="reference" required>
             </div>
             <div>
-                <label for="date">Expected Arrival Date:</label>
+                <label for="date">Expected Shipment Date:</label>
                 <input type="date" name="date" required>
             </div>
             <div>
@@ -29,7 +29,7 @@
             </div>
     
             <div>
-                <button type="submit" name="send_list">Submit</button>
+                <button type="submit" name="order_list">Submit</button>
             </div>
         <table class="inventory_tb">
             <tr>
@@ -46,7 +46,7 @@
                 <th>Location</th>
             </tr>
             <?php
-                $result = mysqli_query($connection, "SELECT iii.*, pt.uom_primary FROM inventory_item_info iii INNER JOIN products_types pt ON iii.ficha = pt.ficha");
+                $result = mysqli_query($connection, "SELECT iii.*, pt.uom_primary FROM inventory_item_info iii INNER JOIN products_types pt ON iii.ficha = pt.ficha WHERE location = 'warehouse'");
                     if($row = mysqli_num_rows($result)){
                         foreach($result as $row){
                             echo "<tr>";

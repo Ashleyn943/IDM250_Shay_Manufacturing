@@ -1,5 +1,6 @@
 <?php
     require_once('db_connect.php');
+    require_once('library/auth.php');
     require_once('library/cms.php');
 ?>
 
@@ -9,31 +10,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/stylesheet.css">
-    <title>Creating Shipping List</title>
+    <title>Master Packing List</title>
 </head>
 <body>
-    <a href="index.php">Return to Main Menu</a> | <a href="mpl_items.php">View Items on Master Packing List</a> | <a href="order.php">Create Order List</a> 
-        <h1>Select Stock to be Shipped</h1>
+    <a href="mpl.php">Return to Create Master Packing</a> | <a href="order.php">Create Order List</a> 
+        <h1>Items on Master Packing List</h1>
         <form method="POST">
-            <div>
-                <label for="reference">Reference Number</label>
-                <input type="number" name="reference" required>
-            </div>
-            <div>
-                <label for="date">Expected Arrival Date:</label>
-                <input type="date" name="date" required>
-            </div>
-            <div>
-                <label for="truck">Trailer name:</label>
-                <input type="text" name="truck" required>
-            </div>
-    
-            <div>
-                <button type="submit" name="send_list">Submit</button>
-            </div>
         <table class="inventory_tb">
             <tr>
-                <th>Select</th>
                 <th>SKU</th>
                 <th>Unit Number</th>
                 <th>Ficha</th>
@@ -43,14 +27,20 @@
                 <th>Quantity Unit</th>
                 <th>Footage Quantity</th>
                 <th>UOM</th>
-                <th>Location</th>
+                <th>Reference Number</th>
+                <th>Ship Date</th>
+                <th>Trailer Name</th>   
+                <th>Status</th>
+                <th>Actions</th>
             </tr>
             <?php
-                $result = mysqli_query($connection, "SELECT iii.*, pt.uom_primary FROM inventory_item_info iii INNER JOIN products_types pt ON iii.ficha = pt.ficha");
-                    if($row = mysqli_num_rows($result)){
+                $stmt = $connection->prepare("SELECT iii.*, mplship.*, pt.uom_primary FROM inventory_item_info iii INNER JOIN mpl_shipping_list mplship ON iii.inventory_id = mplship.item_id INNER JOIN products_types pt ON iii.ficha = pt.ficha");
+                $stmt->execute();
+                $result = $stmt->get_result();
+                    if($result->num_rows > 0){
                         foreach($result as $row){
+                            $stmt->execute();
                             echo "<tr>";
-                            echo "<td> <input type='checkbox' value='" . htmlspecialchars($row['inventory_id']) . "' name='selected_items[" . htmlspecialchars($row['inventory_id']) . "]'> </td>";
                             echo "<td>" . htmlspecialchars($row['sku'] ?? '') . "</td>";
                             echo "<td>" . htmlspecialchars($row['unit_numb'] ?? '') . "</td>";
                             echo "<td>" . htmlspecialchars($row['ficha'] ?? '') . "</td>";
@@ -60,7 +50,11 @@
                             echo "<td>" . htmlspecialchars($row['quantity_unit'] ?? '') . "</td>";
                             echo "<td>" . htmlspecialchars($row['footage_quantity'] ?? '') . "</td>";
                             echo "<td>" . htmlspecialchars($row['uom_primary'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['location'] ?? '') . "</td>";
+                            echo "<td>" . htmlspecialchars($row['reference_numb'] ?? '') . "</td>";
+                            echo "<td>" . htmlspecialchars($row['ship_date'] ?? '') . "</td>";
+                            echo "<td>" . htmlspecialchars($row['trailer_name'] ?? '') . "</td>";
+                            echo "<td>" . htmlspecialchars($row['status'] ?? '') . "</td>";
+                            echo "<td> <a onClick='return confirm(\"Are you sure you want to remove this item from the Master Packing List?\")' href='APIs/mpl-delete.php?id=" . htmlspecialchars($row['id'] ?? 0) . "' name='delete-mpl'>Remove</a></td>";
                             echo "</tr>";
                         }   
                     }

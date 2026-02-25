@@ -1,8 +1,8 @@
 <?php
-    //header('Content-Type: application/json');
-    //header('Access-Control-Allow-Origin: *');
-
     require_once('db_connect.php');
+    require_once('library/auth.php');
+
+    //check_api_key($env);
 ?>
 
 <!DOCTYPE html>
@@ -32,9 +32,9 @@
                 <th>Price Rate</th>
                 <th>Actions</th>
             <?php
-                $result = mysqli_query($connection, "SELECT * FROM products p INNER JOIN products_dimensions pd ON p.id = pd.id INNER JOIN products_types pt ON p.id = pt.id");
-                    if($row = mysqli_num_rows($result)){
-                        foreach($result as $row){
+                $results = mysqli_query($connection, "SELECT * FROM products p INNER JOIN products_dimensions pd ON p.id = pd.id INNER JOIN products_types pt ON p.id = pt.id");
+                    if($row = mysqli_num_rows($results)){
+                        foreach($results as $row){
                             echo "<tr>";
                             echo "<td>" . htmlspecialchars($row['ficha'] ?? '') . "</td>";
                             echo "<td>" . htmlspecialchars($row['sku']) . "</td>";

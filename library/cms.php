@@ -10,7 +10,7 @@
     $method=$_SERVER['REQUEST_METHOD'];
     $id = intval(basename($_SERVER['REQUEST_URI']));
 
-    //add new product
+    //add new product [sku table]
     if(isset($_POST['add_btn'])){
         $sku = $_POST['sku'];
         $ficha = $_POST['ficha'];
@@ -40,7 +40,7 @@
         }
     };
 
-    //update existing product
+    //update existing product [sku table]
     if(isset($_POST['update_btn'])){
         $id = intval($_GET['id']);
         $sku = $_POST['sku'];
@@ -74,24 +74,57 @@
 
 
     //sending selected inventory items to shipping list
-    if(isset($_POST['send_list'])){
+    if(isset($_POST['send_list'])) {
         $selected_items = isset($_POST['selected_items']) && !empty($_POST['selected_items']) ? $_POST['selected_items'] : [];
         $reference = $_POST['reference'];
         $date = $_POST['date'];
         $trailer = $_POST['truck'];
 
-        foreach($selected_items as $key => $shipID){
-            $sql = "SELECT DISTINCT sku, unit_numb, ficha, description1, description2, quantity, quantity_unit, footage_quantity FROM inventory_item_info WHERE inventory_id = $shipID";
-            $result = mysqli_query($connection, $sql);
-            $row = mysqli_fetch_assoc($result);
-
-            if(!empty($row)){
-                $stmt = $connection->prepare("INSERT INTO mpl_shipping_list (sku, unit_numb, ficha, description1, description2, quantity, quantity_unit, footage_quantity, reference_numb, ship_date, trailer_name, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'draft')");
-                $stmt->bind_param("iiissisiiss", $row['sku'], $row['unit_numb'], $row['ficha'], $row['description1'], $row['description2'], $row['quantity'], $row['quantity_unit'], $row['footage_quantity'], $reference, $date, $trailer);
+        if (!preg_match("/^[a-zA-Z0-9_]*$/", $trailer)) {
+            echo "Only alphabets, numbers, and underscores are allowed for Trailer Name";
+        } elseif (!preg_match("/^[0-9]+$/", $reference)) {
+            echo "Only numbers are allowed for Reference Number";
+        } else {
+            foreach($selected_items as $key => $shipID){
+                $stmt = $connection->prepare('INSERT INTO mpl_shipping_list (item_id, reference_numb, ship_date, trailer_name, status) VALUES (?, ?, ?, ?, "draft")');
+                $stmt->bind_param("iiss", $shipID, $reference, $date, $trailer);
                 $stmt->execute();
-            };
+                $stmt= $connection->prepare("UPDATE inventory_item_info SET `location`='warehouse' WHERE inventory_id=$shipID");
+                $stmt->execute();
+            }
 
-            $stmt= $connection->prepare("UPDATE inventory_item_info SET `location`='warehouse' WHERE inventory_id=$shipID");
-            $stmt->execute();
+            if($stmt->execute()){
+                echo "Items sent to shipping list successfully";
+            } else {
+                echo "Failed to send items to shipping list";
+            }
+        };
+    } 
+    
+    ///sending selected inventory items to order list
+    if(isset($_POST['order_list'])) {
+        $selected_items = isset($_POST['selected_items']) && !empty($_POST['selected_items']) ? $_POST['selected_items'] : [];
+        $reference = $_POST['reference'];
+        $date = $_POST['date'];
+        $trailer = $_POST['truck'];
+
+        if (!preg_match("/^[a-zA-Z0-9_]*$/", $trailer)) {
+            echo "Only alphabets, numbers, and underscores are allowed for Trailer Name";
+        } elseif (!preg_match("/^[0-9]+$/", $reference)) {
+            echo "Only numbers are allowed for Reference Number";
+        } else {
+            foreach($selected_items as $key => $shipID){
+                $stmt = $connection->prepare('INSERT INTO order_list (item_id, reference_numb, ship_date, trailer_name, status) VALUES (?, ?, ?, ?, "draft")');
+                $stmt->bind_param("iiss", $shipID, $reference, $date, $trailer);
+                $stmt->execute();
+            }
+
+            if($stmt->execute()){
+                echo "Items sent to order list successfully";
+                
+            } else {
+                echo "Failed to send items to order list";
+            }
         };
     };
+
