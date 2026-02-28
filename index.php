@@ -14,8 +14,43 @@
     <title>Table Practice</title>
 </head>
 <body>
-    <a href="mpl.php">MPL Page</a>
-    <h1>Products</h1>
+    <a href="mpl.php">Create Master Packing List</a> | <a href="order.php">Create Order List</a>
+    <h1>Products in Stock</h1>
+        <table class="data_tb">
+            <tr>
+                <th>SKU</th>
+                <th>Unit Number</th>
+                <th>Ficha</th>
+                <th>Description 1</th>
+                <th>Description 2</th>
+                <th>Quantity</th>
+                <th>Quantity Unit</th>
+                <th>Footage Quantity</th>
+                <th>UOM</th>
+                <th>Location</th>
+            </tr>
+            <?php
+                $results = mysqli_query($connection, "SELECT iii.*, pt.uom_primary FROM inventory_item_info iii INNER JOIN products_types pt ON iii.ficha = pt.ficha");
+                    if($row = mysqli_num_rows($results)){
+                        foreach($results as $row){
+                            echo "<tr>";
+                            echo "<td>" . htmlspecialchars($row['sku'] ?? '') . "</td>";
+                            echo "<td>" . htmlspecialchars($row['unit_numb'] ?? '') . "</td>";
+                            echo "<td>" . htmlspecialchars($row['ficha'] ?? '') . "</td>";
+                            echo "<td>" . htmlspecialchars($row['description1'] ?? '') . "</td>";
+                            echo "<td>" . htmlspecialchars($row['description2'] ?? '') . "</td>";
+                            echo "<td>" . htmlspecialchars($row['quantity'] ?? '') . "</td>";
+                            echo "<td>" . htmlspecialchars($row['quantity_unit'] ?? '') . "</td>";
+                            echo "<td>" . htmlspecialchars($row['footage_quantity'] ?? '') . "</td>";
+                            echo "<td>" . htmlspecialchars($row['uom_primary'] ?? '') . "</td>";
+                            echo "<td>" . htmlspecialchars($row['location'] ?? '') . "</td>";
+                            echo "</tr>";
+                        }
+                    };
+            ?>
+        </table>
+    <br><br>
+    <h1>Products Carried</h1>
         <a href="APIs/product-new.php">Add New Product</a>
         <table class="data_tb">
             <tr>

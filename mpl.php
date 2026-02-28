@@ -13,7 +13,7 @@
 </head>
 <body>
     <a href="index.php">Return to Main Menu</a> | <a href="mpl_items.php">View Items on Master Packing List</a> | <a href="order.php">Create Order List</a> 
-        <h1>Select Stock to be Shipped</h1>
+        <h1>Select Stock to be Moved to Warehouse</h1>
         <form method="POST">
             <div>
                 <label for="reference">Reference Number</label>
@@ -49,19 +49,21 @@
                 $result = mysqli_query($connection, "SELECT iii.*, pt.uom_primary FROM inventory_item_info iii INNER JOIN products_types pt ON iii.ficha = pt.ficha");
                     if($row = mysqli_num_rows($result)){
                         foreach($result as $row){
-                            echo "<tr>";
-                            echo "<td> <input type='checkbox' value='" . htmlspecialchars($row['inventory_id']) . "' name='selected_items[" . htmlspecialchars($row['inventory_id']) . "]'> </td>";
-                            echo "<td>" . htmlspecialchars($row['sku'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['unit_numb'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['ficha'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['description1'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['description2'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['quantity'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['quantity_unit'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['footage_quantity'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['uom_primary'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['location'] ?? '') . "</td>";
-                            echo "</tr>";
+                            if($row['location'] === 'internal'){
+                                echo "<tr>";
+                                echo "<td> <input type='checkbox' value='" . htmlspecialchars($row['inventory_id']) . "' name='selected_items[" . htmlspecialchars($row['inventory_id']) . "]'> </td>";
+                                echo "<td>" . htmlspecialchars($row['sku'] ?? '') . "</td>";
+                                echo "<td>" . htmlspecialchars($row['unit_numb'] ?? '') . "</td>";
+                                echo "<td>" . htmlspecialchars($row['ficha'] ?? '') . "</td>";
+                                echo "<td>" . htmlspecialchars($row['description1'] ?? '') . "</td>";
+                                echo "<td>" . htmlspecialchars($row['description2'] ?? '') . "</td>";
+                                echo "<td>" . htmlspecialchars($row['quantity'] ?? '') . "</td>";
+                                echo "<td>" . htmlspecialchars($row['quantity_unit'] ?? '') . "</td>";
+                                echo "<td>" . htmlspecialchars($row['footage_quantity'] ?? '') . "</td>";
+                                echo "<td>" . htmlspecialchars($row['uom_primary'] ?? '') . "</td>";
+                                echo "<td>" . htmlspecialchars($row['location'] ?? '') . "</td>";
+                                echo "</tr>";
+                            }
                         }   
                     }
             ?>

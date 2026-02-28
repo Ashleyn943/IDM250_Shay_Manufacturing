@@ -12,8 +12,8 @@
 
     //add new product [sku table]
     if(isset($_POST['add_btn'])){
-        $sku = $_POST['sku'];
-        $ficha = $_POST['ficha'];
+        $sku = htmlspecialchars($_POST['sku']);
+        $ficha = htmlspecialchars($_POST['ficha']);
         $description = $_POST['description'];
         $rate = $_POST['rate'];
         $length_inches = $_POST['length_inches'];
@@ -76,9 +76,9 @@
     //sending selected inventory items to shipping list
     if(isset($_POST['send_list'])) {
         $selected_items = isset($_POST['selected_items']) && !empty($_POST['selected_items']) ? $_POST['selected_items'] : [];
-        $reference = $_POST['reference'];
-        $date = $_POST['date'];
-        $trailer = $_POST['truck'];
+        $reference = htmlspecialchars($_POST['reference']);
+        $date = htmlspecialchars($_POST['date']);
+        $trailer = htmlspecialchars($_POST['truck']);
 
         if (!preg_match("/^[a-zA-Z0-9_]*$/", $trailer)) {
             echo "Only alphabets, numbers, and underscores are allowed for Trailer Name";
@@ -102,29 +102,33 @@
     } 
     
     ///sending selected inventory items to order list
-    if(isset($_POST['order_list'])) {
-        $selected_items = isset($_POST['selected_items']) && !empty($_POST['selected_items']) ? $_POST['selected_items'] : [];
-        $reference = $_POST['reference'];
-        $date = $_POST['date'];
-        $trailer = $_POST['truck'];
+        if(isset($_POST['order_list'])) {
+            $selected_items = isset($_POST['selected_items']) && !empty($_POST['selected_items']) ? $_POST['selected_items'] : [];
+            $reference = $_POST['reference'];
+            $date = $_POST['date'];
+            $trailer = $_POST['truck'];
 
-        if (!preg_match("/^[a-zA-Z0-9_]*$/", $trailer)) {
-            echo "Only alphabets, numbers, and underscores are allowed for Trailer Name";
-        } elseif (!preg_match("/^[0-9]+$/", $reference)) {
-            echo "Only numbers are allowed for Reference Number";
-        } else {
-            foreach($selected_items as $key => $shipID){
-                $stmt = $connection->prepare('INSERT INTO order_list (item_id, reference_numb, ship_date, trailer_name, status) VALUES (?, ?, ?, ?, "draft")');
-                $stmt->bind_param("iiss", $shipID, $reference, $date, $trailer);
-                $stmt->execute();
-            }
-
-            if($stmt->execute()){
-                echo "Items sent to order list successfully";
-                
+            if (!preg_match("/^[a-zA-Z0-9_]*$/", $trailer)) {
+                echo "Only alphabets, numbers, and underscores are allowed for Trailer Name";
+            } elseif (!preg_match("/^[0-9]+$/", $reference)) {
+                echo "Only numbers are allowed for Reference Number";
             } else {
-                echo "Failed to send items to order list";
-            }
+                foreach($selected_items as $key => $shipID){
+                    $stmt = $connection->prepare('INSERT INTO order_list (item_id, reference_numb, ship_date, trailer_name, status) VALUES (?, ?, ?, ?, "draft")');
+                    $stmt->bind_param("iiss", $shipID, $reference, $date, $trailer);
+                    $stmt->execute();
+
+                    $stmt= $connection->prepare("UPDATE inventory_item_info SET `location`='shipping' WHERE inventory_id=$shipID");
+                    $stmt->execute();
+                }
+
+                if($stmt->execute()){
+                    echo "Items sent to order list successfully";
+                    
+                } else {
+                    echo "Failed to send items to order list";
+                }
+            };
         };
-    };
+    
 
