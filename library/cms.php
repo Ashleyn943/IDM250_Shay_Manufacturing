@@ -124,7 +124,7 @@
 
                 if($stmt->execute()){
                     echo "Items sent to order list successfully";
-                    
+                    header("Location: ../order_items.php");
                 } else {
                     echo "Failed to send items to order list";
                 }

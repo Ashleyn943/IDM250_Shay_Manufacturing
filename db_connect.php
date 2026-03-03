@@ -9,6 +9,8 @@
 
     $connection = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 
+    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
     if ($connection->connect_error){
         die("Connection failed:" . $connection->connect_error);
     }
