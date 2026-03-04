@@ -3,6 +3,8 @@
 
     // Fetch counts for the summary cards
     $sku_count = mysqli_num_rows(mysqli_query($connection, "SELECT id FROM products"));
+    $internal_count = mysqli_num_rows(mysqli_query($connection, "SELECT id FROM inventory_item_info WHERE location='internal'"));
+    $warehouse_count = mysqli_num_rows(mysqli_query($connection, "SELECT id FROM inventory_item_info WHERE location='warehouse'"));
 ?>
 
 <!DOCTYPE html>
@@ -27,11 +29,11 @@
         </div>
         <div class="card">
             <h3>Internal Inventory</h3>
-            <p class="stat-number">100</p>
+            <p class="stat-number"><?php echo $internal_count; ?></p>
         </div>
         <div class="card">
             <h3>Warehouse Inventory</h3>
-            <p class="stat-number">0</p>
+            <p class="stat-number"><?php echo $warehouse_count; ?></p>
         </div>
     </div>
 

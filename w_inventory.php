@@ -1,5 +1,7 @@
 <?php
     require_once('db_connect.php');
+
+    $warehouse_count = mysqli_num_rows(mysqli_query($connection, "SELECT inventory_id FROM inventory_item_info WHERE location = 'warehouse'"));
 ?>
 
 <!DOCTYPE html>
@@ -21,7 +23,7 @@
         <div class="stats-row">
             <div class="card">
                 <h3>Total Items</h3>
-                <p class="stat-number">--</p>
+                <p class="stat-number"><?php echo $warehouse_count; ?></p>
             </div>
             <div class="card">
                 <h3>Pending Receipts</h3>
@@ -31,32 +33,6 @@
                 <h3>Pending Shipments</h3>
                 <p class="stat-number">--</p>
             </div>
-        </div>
-
-        <div class="section-container">
-            <h2>Filters</h2>
-            <form method="GET" class="form-grid">
-                <div class="form-group">
-                    <label for="search">Search</label>
-                    <input type="text" id="search" name="search" placeholder="SKU, description, or ficha">
-                </div>
-                <div class="form-group">
-                    <label for="warehouse">Warehouse</label>
-                    <input type="text" id="warehouse" name="warehouse" placeholder="Main, East, West">
-                </div>
-                <div class="form-group">
-                    <label for="bin">Bin / Rack</label>
-                    <input type="text" id="bin" name="bin" placeholder="A1, B2, C3">
-                </div>
-                <div class="form-group">
-                    <label for="status">Status</label>
-                    <input type="text" id="status" name="status" placeholder="Available, Reserved, In Transit">
-                </div>
-                <div class="form-footer-actions full-width">
-                    <a href="w_inventory.php" class="cancel-link">Reset</a>
-                    <button type="submit" class="btn">Apply Filters</button>
-                </div>
-            </form>
         </div>
 
         <div class="section-container">
@@ -85,17 +61,28 @@
                     <th>Actions</th>
                 </tr>
                 <tr>
-                    <td>--</td>
-                    <td>--</td>
-                    <td>--</td>
-                    <td>--</td>
-                    <td>--</td>
-                    <td>--</td>
-                    <td>--</td>
-                    <td>--</td>
-                    <td>--</td>
-                    <td>--</td>
-                    <td><a href="#">Edit</a></td>
+                   <?php
+					$result = mysqli_query($connection, "SELECT * FROM inventory_item_info WHERE location = 'warehouse'");
+					if ($result && mysqli_num_rows($result) > 0) {
+						while ($row = mysqli_fetch_assoc($result)) {
+							$description = trim(($row['description1'] ?? '') . ' ' . ($row['description2'] ?? ''));
+							echo "<tr>";
+							echo "<td>" . htmlspecialchars($row['sku'] ?? '') . "</td>";
+							echo "<td>" . htmlspecialchars($row['unit_numb'] ?? '') . "</td>";
+							echo "<td>" . htmlspecialchars($row['ficha'] ?? '') . "</td>";
+							echo "<td>" . htmlspecialchars($description) . "</td>";
+							echo "<td>" . htmlspecialchars($row['quantity'] ?? '') . "</td>";
+							echo "<td>" . htmlspecialchars($row['quantity_unit'] ?? '') . "</td>";
+							echo "<td>" . htmlspecialchars($row['footage_quantity'] ?? '') . "</td>";
+							echo "<td>" . htmlspecialchars($row['location'] ?? '-') . "</td>";
+							echo "<td>" . htmlspecialchars($row['status'] ?? '-') . "</td>";
+							echo "<td><td> <a onClick='return confirm(\"Are you sure you want to remove this item from the Master Packing List?\")' href='APIs/mpl-delete.php?id=" . htmlspecialchars($row['id'] ?? 0) . "' name='delete-mpl'>Remove</a></td></td>";
+							echo "</tr>";
+						}
+					} else {
+						echo "<tr><td colspan='10'>No inventory items found.</td></tr>";
+					}
+				?>
                 </tr>
             </table>
         </div>

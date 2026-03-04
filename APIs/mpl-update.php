@@ -1,7 +1,7 @@
 <?php
     require_once('../db_connect.php');
     //require_once('../library/auth.php');
-    require_once('../library/cms.php');
+    require_once('../library/cms_alt.php');
 ?>
 
 <!DOCTYPE html>
@@ -9,61 +9,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/stylesheet.css">
+    <link rel="stylesheet" href="../css/stylesheet.css">
+    <link rel="stylesheet" href="../css/nav.css">
+    <link rel="stylesheet" href="../css/normalize.css">
     <link rel="icon" href="../media/ShayIcon.png" type="image/x-icon">
-    <title>Table Practice</title>
+    <title>Update Master Packing List</title>
 </head>
 <body>
-    <h1>
-        Edit Product
-    </h1>
-    <a href="../mpl_items.php">Back to Master Packing List</a>
-    <?php
-    $result = mysqli_query($connection, "SELECT * FROM inventory_item_info iii INNER JOIN mpl_shipping_list mplship ON iii.inventory_id = mplship.item_id INNER JOIN products p ON iii.sku = p.sku");
-    $row = mysqli_fetch_assoc($result);
-    ?>
-    <form method="POST">
-        <div>
-            <label for="sku">Sku:</label>
-            <input type="number" name="sku" value="<?php echo htmlspecialchars($row['sku']) ?? ''; ?>" required>
-        </div>
-        <div>
-            <label for="unit_numb">Unit Number:</label>
-            <input type="text" name="unit_numb" value="<?php echo htmlspecialchars($row['unit_numb']) ?? ''; ?>" required>
-        </div>
-        <div>
-            <label for="ficha">Ficha:</label>
-            <input type="number" name="ficha" value="<?php echo htmlspecialchars($row['ficha']) ?? ''; ?>" required>
-        </div>
-        <div>
-            <label for="description1">Description 1:</label>
-            <input type="text" name="description1" value="<?php echo htmlspecialchars($row['description1']) ?? ''; ?>" required>
-        </div>
-        <div>
-            <label for="description2">Description 2:</label>
-            <input type="text" name="description2" value="<?php echo htmlspecialchars($row['description2']) ?? ''; ?>" required>
-        </div>
-        <div>
-            <label for="quantity">Quantity:</label>
-            <input type="number" name="quantity" value="<?php echo htmlspecialchars($row['quantity']) ?? ''; ?>" required>
-        </div>
-        <div>
-            <label for="quantity_unit">Quantity Unit:</label>
-            <input type="text" name="quantity_unit" value="<?php echo htmlspecialchars($row['quantity_unit']) ?? ''; ?>" required>
-        </div>
-        <div>
-            <label for="uom_primary">Unit of Measure:</label>
-            <input type="text" name="uom_primary" value="<?php echo htmlspecialchars($row['uom_primary']) ?? ''; ?>" required>
-        </div>
-        </div> 
-        <div>
-            <label for="footage_quantity">Footage Quantity:</label>
-            <input type="number" name="footage_quantity" step="0.01" value="<?php echo htmlspecialchars($row['footage_quantity']) ?? ''; ?>" required>
-        </div>
-        
-        <div>
-            <button type="submit" name="update_mpl_btn">Update Product</button>
-        </div>
+    <?php include('../header_alt.php'); ?>
+    <div class="dashboard-container">
+        <div class="form-card-centered">
+            <h1>Edit Details of Master Packing List Item</h1>
+            <p class="form-instruction">Update item details below.</p>
+            <?php
+                $id = intval($_GET['id']);
+
+                $result = mysqli_query($connection, "SELECT * FROM mpl_shipping_list mplship
+                                                                    INNER JOIN inventory_item_info iii ON mplship.item_id = iii.inventory_id");
+                $row = mysqli_fetch_assoc($result);
+            ?>
+    <form action="../library/cms_alt.php?id=<?php echo $id; ?>" method="POST" class="styled-form">
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="ref_numb">Reference Number</label>
+                <input type="number" name="ref_numb" value="<?php echo htmlspecialchars($row['reference_numb']) ?? ''; ?>" required>
+            </div>
+            <div  class="form-group">
+                <label for="ship_date">Expected Arrival Date</label>
+                <input type="date" name="ship_date" value="<?php echo htmlspecialchars($row['ship_date']) ?? ''; ?>" required>
+            </div>
+            <div class="form-group">
+                <label for="truck">Vehicle Name</label>
+                <input type="text" name="truck" value="<?php echo htmlspecialchars($row['trailer_name']) ?? ''; ?>" required>
+            </div>
+            
+            <div class="form-footer-actions">
+                <a href="../mpl_items.php" class="cancel-link">Cancel</a>
+                <button type="submit" name="update_mpl_btn" class="btn">Update Item Details</button>
+            </div>
     </form>
 </body>
 </html>

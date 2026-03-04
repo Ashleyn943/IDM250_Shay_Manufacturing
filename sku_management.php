@@ -1,4 +1,4 @@
-<?php 
+<?php
     require_once('db_connect.php');
 ?>
 
@@ -7,6 +7,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/stylesheet.css">
     <title>Sku Management</title>
     <link rel="stylesheet" href="css/stylesheet.css">
     <link rel="stylesheet" href="css/nav.css">
@@ -19,7 +20,6 @@
         <h1>Products</h1>
         <a href="APIs/product-new.php" class="btn">Add New Product</a>
     </div>
-    
     <div class="table-container">
         <table class="data_tb">
             <tr>
@@ -36,9 +36,9 @@
                 <th>Price Rate</th>
                 <th>Actions</th>
             <?php
-                $result = mysqli_query($connection, "SELECT * FROM products p INNER JOIN products_dimensions pd ON p.id = pd.id INNER JOIN products_types pt ON p.id = pt.id");
-                    if($row = mysqli_num_rows($result)){
-                        foreach($result as $row){
+                $results = mysqli_query($connection, "SELECT * FROM products p INNER JOIN products_dimensions pd ON p.id = pd.id INNER JOIN products_types pt ON p.id = pt.id");
+                    if($row = mysqli_num_rows($results)){
+                        foreach($results as $row){
                             echo "<tr>";
                             echo "<td>" . htmlspecialchars($row['ficha'] ?? '') . "</td>";
                             echo "<td>" . htmlspecialchars($row['sku']) . "</td>";

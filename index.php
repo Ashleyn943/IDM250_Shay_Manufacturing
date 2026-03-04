@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="css/stylesheet.css">
     <link rel="stylesheet" href="css/nav.css">
     <link rel="icon" href="media/ShayIcon.png" type="image/x-icon">
-    <title>Table Practice</title>
+    <title>Home</title>
 </head>
 <body>
     <?php include('header.php'); ?>

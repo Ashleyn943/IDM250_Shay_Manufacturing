@@ -1,11 +1,6 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-    // require_once('library/auth.php');
-    // require_once('library/cms.php');
     require_once('db_connect.php');
+    require_once('library/cms.php');
 ?>
 
 <!DOCTYPE html>
@@ -14,12 +9,13 @@ error_reporting(E_ALL);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/stylesheet.css">
+    <link rel="stylesheet" href="css/stylesheet.css">
     <link rel="stylesheet" href="css/nav.css">
     <link rel="icon" href="media/ShayIcon.png" type="image/x-icon">
     <title>Shipping List</title>
 </head>
 <body>
-    <?php include('header.php'); ?>
+       <?php include('header.php'); ?>
     <div class="dashboard-container">
     <?php if (isset($_GET['status']) && $_GET['status'] === 'success') { ?>
         <div class="status-banner status-success">
@@ -30,6 +26,7 @@ error_reporting(E_ALL);
             Please select at least one item and fill out all fields before submitting.
         </div>
     <?php } ?>
+    
     <div class="form-section">
         <h1>Select Stock to be Shipped</h1>
         <form method="POST" action="library/cms.php">
@@ -62,7 +59,7 @@ error_reporting(E_ALL);
                 <th>Location</th>
             </tr>
             <?php
-                $result = mysqli_query($connection, "SELECT * FROM inventory_item_info");
+                $result = mysqli_query($connection, "SELECT * FROM inventory_item_info WHERE location = 'internal'");
                     if($row = mysqli_num_rows($result)){
                         foreach($result as $row){
                             echo "<tr>";

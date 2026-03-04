@@ -10,19 +10,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/stylesheet.css">
-    <link rel="icon" href="media/ShayIcon.png" type="image/x-icon">
     <title>Order List</title>
 </head>
 <body>
     <a href="mpl.php">Return to Create Master Packing List</a> | <a href="order.php">Create Order List</a> 
         <h1>Items on Order List</h1>
-        <form method="POST" action="APIs/api_orders.php">
-            <div>
-                <button type="submit" name="order_send" onClick='return confirm(\"Are you sure you want to send this order to the warehouse?\")'>Send Order to Warehouse</button>
-            </div>
+        <form method="POST">
         <table class="inventory_tb">
             <tr>
-                <th>Select</th>
                 <th>SKU</th>
                 <th>Unit Number</th>
                 <th>Ficha</th>
@@ -46,7 +41,6 @@
                         foreach($result as $row){
                             $stmt->execute();
                             echo "<tr>";
-                            echo "<td> <input type='checkbox' value='" . htmlspecialchars($row['item_id']) . "' name='selected_items[]'> </td>";
                             echo "<td>" . htmlspecialchars($row['sku'] ?? '') . "</td>";
                             echo "<td>" . htmlspecialchars($row['unit_numb'] ?? '') . "</td>";
                             echo "<td>" . htmlspecialchars($row['ficha'] ?? '') . "</td>";

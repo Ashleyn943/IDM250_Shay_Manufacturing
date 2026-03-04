@@ -10,8 +10,8 @@
                 mplship.status,
                 iii.unit_numb,
                 iii.ficha,
-                iii.description_1,
-                iii.description_2,
+                iii.description1,
+                iii.description2,
                 iii.quantity,
                 iii.quantity_unit,
                 iii.footage_quantity
@@ -82,8 +82,8 @@
                             echo "<td>" . htmlspecialchars($row['status']) . "</td>";
                             echo "<td>" . htmlspecialchars($row['unit_numb']) . "</td>";
                             echo "<td>" . htmlspecialchars($row['ficha']) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['description_1']) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['description_2']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['description1']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['description2']) . "</td>";
                             echo "<td>" . htmlspecialchars($row['quantity']) . "</td>";
                             echo "<td>" . htmlspecialchars($row['quantity_unit']) . "</td>";
                             echo "<td>" . htmlspecialchars($row['footage_quantity']) . "</td>";

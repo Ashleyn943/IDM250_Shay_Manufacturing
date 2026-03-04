@@ -5,7 +5,7 @@
     // header('Content-Type: application/json');
     // header('Access-Control-Allow-Origin: *');
 
-    require_once(__DIR__ . '/../db_connect.php');
+    require_once('../db_connect.php');
     // require_once('/auth.php');
 
     // check_api_key($env);
@@ -122,6 +122,24 @@
         } else {
             header("Location: ../mpl.php?status=missing");
             exit;
+        }
+    };
+
+    //update existing product [sku table]
+    if(isset($_POST['update_mpl_btn'])){
+        $id = intval($_GET['id']);
+        $reference = $_POST['ref_numb'];
+        $ship_date = $_POST['ship_date'];
+        $trailer = $_POST['truck'];
+
+        $stmt = $connection->prepare("UPDATE mpl_shipping_list SET reference_numb=?, ship_date=?, trailer_name=? WHERE id=$id");
+        $stmt->bind_param("iis", $reference, $ship_date, $trailer);
+        
+        if($stmt->execute()){
+            echo "Item details updated successfully";
+            header("Location: ../mpl_items.php");
+        } else {
+            echo "Failed to update item details";
         }
     };
     
