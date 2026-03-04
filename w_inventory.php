@@ -36,32 +36,6 @@
         </div>
 
         <div class="section-container">
-            <h2>Filters</h2>
-            <form method="GET" class="form-grid">
-                <div class="form-group">
-                    <label for="search">Search</label>
-                    <input type="text" id="search" name="search" placeholder="SKU, description, or ficha">
-                </div>
-                <div class="form-group">
-                    <label for="warehouse">Warehouse</label>
-                    <input type="text" id="warehouse" name="warehouse" placeholder="Main, East, West">
-                </div>
-                <div class="form-group">
-                    <label for="bin">Bin / Rack</label>
-                    <input type="text" id="bin" name="bin" placeholder="A1, B2, C3">
-                </div>
-                <div class="form-group">
-                    <label for="status">Status</label>
-                    <input type="text" id="status" name="status" placeholder="Available, Reserved, In Transit">
-                </div>
-                <div class="form-footer-actions full-width">
-                    <a href="w_inventory.php" class="cancel-link">Reset</a>
-                    <button type="submit" class="btn">Apply Filters</button>
-                </div>
-            </form>
-        </div>
-
-        <div class="section-container">
             <h2>Quick Actions</h2>
             <div class="button-group">
                 <a href="#" class="btn">Receive Stock</a>
