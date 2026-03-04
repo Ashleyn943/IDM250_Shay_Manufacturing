@@ -31,7 +31,7 @@
                 $row = mysqli_fetch_assoc($result);
             ?>
 
-            <form action="../library/cms_alt.php?id=<?php echo $id; ?>" method="POST" class="styled-form">
+            <form action="../library/cms.php?id=<?php echo $id; ?>" method="POST" class="styled-form">
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="sku">Product SKU</label>

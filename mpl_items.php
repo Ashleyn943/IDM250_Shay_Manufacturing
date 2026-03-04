@@ -44,12 +44,20 @@
             </div>
         <?php } ?>
 
+        <?php if (isset($_GET['status']) && $_GET['status'] === 'sent') { ?>
+            <div class="status-banner status-success">
+                MPL item(s) sent successfully.
+            </div>
+        <?php } ?>
+
         <div class="section-container">
-            <h2>Quick Actions</h2>
+            <h2>Actions</h2>
             <div class="button-group">
                 <a href="mpl.php" class="btn">Create New MPL</a>
+                <a href="APIs/api-mpl.php" class="btn">Send MPL</a>
             </div>
         </div>
+
 
         <div class="table-container">
             <h2>All Shipping Records</h2>

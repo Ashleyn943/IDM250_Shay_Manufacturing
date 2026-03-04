@@ -2,8 +2,8 @@
     header('Content-Type: application/json');
     header('Access-Control-Allow-Origin: *');
 
-    require_once('../db_connect.php');
-    require_once('../library/auth.php');
+     require_once(__DIR__ .  '/../db_connect.php');
+    require_once(__DIR__ .  '/../library/auth.php');
 
     check_api_key($env);
 
@@ -13,7 +13,7 @@
 
 
     if($method === 'GET'){
-        $sql =  "SELECT ol.*, iii.*, pt.uom_primary FROM order_list ol INNER JOIN inventory_item_info iii ON ol.item_id = iii.inventory_id INNER JOIN products_types pt ON iii.ficha = pt.ficha WHERE ol.status='draft'";
+        $sql =  "SELECT ol.*, iii.*, pt.uom_primary FROM order_list ol INNER JOIN inventory_item_info iii ON ol.item_id = iii.inventory_id INNER JOIN products_types pt ON iii.ficha = pt.ficha WHERE ol.status='pending'";
         $result = mysqli_query($connection, $sql);
         $data = mysqli_fetch_all($result, MYSQLI_ASSOC);
         $encoded_data = json_encode($data);
@@ -26,7 +26,7 @@
     } elseif ($method === 'POST'){
         $input = json_decode(file_get_contents('php://input'), true);
 
-        if (!isset($input['reference']) || !isset($input['date']) || !isset($input['truck']) || !isset($input['selected_items'])) {
+        if (!isset($input['reference']) || !isset($input['date']) || !isset($input['truck'])) {
             http_response_code(400);
             echo json_encode(['error' => 'Invalid Input, Missing required fields']);
             exit;
@@ -34,8 +34,14 @@
             $reference = htmlspecialchars($input['reference']);
             $date = htmlspecialchars($input['date']);
             $trailer = htmlspecialchars($input['truck']);
-            $selected_items = $input['selected_items'];
         };
+
+            $sql = "SELECT item_id FROM order_list WHERE status='draft'";
+            $result = mysqli_query($connection, $sql);
+            $selected_items = [];
+            while($row = mysqli_fetch_assoc($result)) {
+                $selected_items[] = $row['item_id'];
+            }
     try {
         foreach($selected_items as $shipID){
             //personal database

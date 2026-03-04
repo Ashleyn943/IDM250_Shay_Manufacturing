@@ -1,12 +1,19 @@
 <?php
     header('Content-Type: application/json');
     header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Headers: Content-Type, X-API-KEY');
+    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 
-    require_once('../db_connect.php');
-    require_once('../library/auth.php');
+    require_once(__DIR__ .  '/../db_connect.php');
+    require_once(__DIR__ .  '/../library/auth.php');
 
     $env_file = __DIR__ . '/../.env.php';
     $env = file_exists($env_file) ? require $env_file : [];
+
+    if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+        http_response_code(204);
+        exit;
+    }
 
     check_api_key($env);
 
@@ -23,8 +30,8 @@
                     mplship.status,
                     iii.unit_numb,
                     iii.ficha,
-                    iii.description_1,
-                    iii.description_2,
+                    iii.description1,
+                    iii.description2,
                     iii.quantity,
                     iii.quantity_unit,
                     iii.footage_quantity
@@ -50,33 +57,36 @@
 
     } elseif ($method === 'POST') {
         // Create new shipping record
-        $input = json_decode(file_get_contents('php://input'), true);
+        $raw_input = file_get_contents('php://input');
+        $json_input = json_decode($raw_input, true);
+        $input = is_array($json_input) ? $json_input : $_POST;
 
-        if (!isset($input['item_id']) || !isset($input['reference_number']) || !isset($input['ship_date']) || !isset($input['trailer_name'])) {
+        $item_id = isset($input['item_id']) ? intval($input['item_id']) : 0;
+        $reference_numb = isset($input['reference_number']) ? intval($input['reference_number']) : (isset($input['reference_numb']) ? intval($input['reference_numb']) : 0);
+        $ship_date = $input['ship_date'] ?? ($input['date'] ?? '');
+        $trailer_name = $input['trailer_name'] ?? ($input['truck'] ?? '');
+        $status = $input['status'] ?? 'pending';
+
+        if ($item_id <= 0 || $reference_numb <= 0 || $ship_date === '' || $trailer_name === '') {
             http_response_code(400);
-            echo json_encode(['success' => false, 'error' => 'Missing required fields: item_id, reference_number, ship_date, trailer_name']);
+            echo json_encode(['success' => false, 'error' => 'Missing required fields: item_id, reference_number/reference_numb, ship_date/date, trailer_name/truck']);
             exit;
         }
 
-        $item_id = intval($input['item_id']);
-        $reference_numb = intval($input['reference_number']);
-        $ship_date = $connection->real_escape_string($input['ship_date']);
-        $trailer_name = $connection->real_escape_string($input['trailer_name']);
-        $status = $connection->real_escape_string($input['status'] ?? 'Pending');
+        $stmt = $connection->prepare("INSERT INTO mpl_shipping_list (item_id, reference_numb, ship_date, trailer_name, status) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param("iisss", $item_id, $reference_numb, $ship_date, $trailer_name, $status);
 
-        $sql = "INSERT INTO mpl_shipping_list (item_id, reference_numb, ship_date, trailer_name, status) 
-                VALUES ($item_id, $reference_numb, '$ship_date', '$trailer_name', '$status')";
-
-        if (mysqli_query($connection, $sql)) {
-            $new_id = $connection->insert_id;
+        if ($stmt->execute()) {
             echo json_encode([
                 'success' => true,
                 'message' => 'Shipping record created',
-                'id' => $new_id
+                'id' => $connection->insert_id
             ]);
+            $stmt->close();
         } else {
             http_response_code(500);
-            echo json_encode(['success' => false, 'error' => 'Failed to insert record: ' . mysqli_error($connection)]);
+            echo json_encode(['success' => false, 'error' => 'Failed to insert record: ' . $stmt->error]);
+            $stmt->close();
         }
 
     } else {

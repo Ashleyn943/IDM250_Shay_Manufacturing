@@ -5,7 +5,7 @@
     // header('Content-Type: application/json');
     // header('Access-Control-Allow-Origin: *');
 
-    require_once('../db_connect.php');
+    require_once(__DIR__ .  '/../db_connect.php');
     // require_once('/auth.php');
 
     // check_api_key($env);
@@ -125,7 +125,7 @@
         }
     };
 
-    //update existing product [sku table]
+    //update mpl item details
     if(isset($_POST['update_mpl_btn'])){
         $id = intval($_GET['id']);
         $reference = $_POST['ref_numb'];
@@ -133,7 +133,7 @@
         $trailer = $_POST['truck'];
 
         $stmt = $connection->prepare("UPDATE mpl_shipping_list SET reference_numb=?, ship_date=?, trailer_name=? WHERE id=$id");
-        $stmt->bind_param("iis", $reference, $ship_date, $trailer);
+        $stmt->bind_param("iss", $reference, $ship_date, $trailer);
         
         if($stmt->execute()){
             echo "Item details updated successfully";

@@ -18,12 +18,34 @@
     <?php include('header.php'); ?>
     <div class="Products">
         <h1>Products</h1>
+            <?php if (isset($_GET['status']) && $_GET['status'] === 'success_new') { ?>
+                <div class="status-banner status-success">
+                    New product added successfully.
+                </div>
+            <?php } ?>
+            <?php if (isset($_GET['status']) && $_GET['status'] === 'success_update') { ?>
+                <div class="status-banner status-success">
+                    Product updated successfully.
+                </div>
+            <?php } ?>
+            <?php if (isset($_GET['status']) && $_GET['status'] === 'success_delete') { ?>
+                <div class="status-banner status-success">
+                    Product deleted successfully.
+                </div>
+            <?php } ?>
+            <?php if (isset($_GET['status']) && $_GET['status'] === 'failed') { ?>
+                <div class="status-banner status-error">
+                    Failed action. Please try again.
+                </div>
+            <?php } ?>
+            
+
         <a href="APIs/product-new.php" class="btn">Add New Product</a>
     </div>
     <div class="table-container">
         <table class="data_tb">
             <tr>
-                <th>ID</th>
+                <th>Ficha</th>
                 <th>Sku</th>
                 <th>Description</th>
                 <th>Unit of Measure</th>
@@ -36,7 +58,7 @@
                 <th>Price Rate</th>
                 <th>Actions</th>
             <?php
-                $results = mysqli_query($connection, "SELECT * FROM products p INNER JOIN products_dimensions pd ON p.id = pd.id INNER JOIN products_types pt ON p.id = pt.id");
+                $results = mysqli_query($connection, "SELECT p.*, pd.*, pt.* FROM products p LEFT JOIN products_dimensions pd ON p.id = pd.id LEFT JOIN products_types pt ON p.ficha = pt.ficha");
                     if($row = mysqli_num_rows($results)){
                         foreach($results as $row){
                             echo "<tr>";
