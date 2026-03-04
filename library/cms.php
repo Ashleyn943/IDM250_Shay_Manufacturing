@@ -37,7 +37,7 @@
         if($stmt1->execute() && $stmt2->execute() && $stmt3->execute()){
             echo "Product added successfully";
             $inserted_id = $connection->insert_id;
-            header("Location: ../index.php");
+            header("Location: ../sku_management.php?status=product-added");
         } else {
             echo "Failed to add product";
         }
@@ -67,7 +67,7 @@
         
         if($stmt1->execute() && $stmt2->execute() && $stmt3->execute()){
             echo "Product updated successfully";
-            header("Location: ../index.php");
+            header("Location: ../sku_management.php?status=product-updated");
         } else {
             echo "Failed to update product";
         }
@@ -92,7 +92,7 @@
 
         if($stmt1->execute() && $stmt2->execute() && $stmt3->execute()){
             echo "Product deleted successfully";
-            header("Location: ../index.php");
+            header("Location: ../sku_management.php?status=product-deleted");
             exit;
         } else {
             echo "Failed to delete product";
@@ -124,6 +124,108 @@
             exit;
         }
     };
+
+    //send MPL item to other team (draft -> pending)
+    if (isset($_POST['send_mpl_btn'])) {
+        $mpl_id = intval($_POST['mpl_id'] ?? 0);
+
+        if ($mpl_id <= 0) {
+            header("Location: ../mpl_items.php?status=send-failed");
+            exit;
+        }
+
+        $package_stmt = $connection->prepare("SELECT reference_numb, ship_date, trailer_name FROM mpl_shipping_list WHERE id=? AND status='draft' LIMIT 1");
+        $package_stmt->bind_param("i", $mpl_id);
+        $package_stmt->execute();
+        $package_result = $package_stmt->get_result();
+        $package = $package_result ? $package_result->fetch_assoc() : null;
+
+        if (!$package) {
+            header("Location: ../mpl_items.php?status=send-failed");
+            exit;
+        }
+
+        $stmt = $connection->prepare("UPDATE mpl_shipping_list SET status='pending' WHERE reference_numb=? AND ship_date=? AND trailer_name=? AND status='draft'");
+        $stmt->bind_param("iss", $package['reference_numb'], $package['ship_date'], $package['trailer_name']);
+
+        if ($stmt->execute() && $stmt->affected_rows > 0) {
+            header("Location: ../mpl_items.php?status=sent");
+        } else {
+            header("Location: ../mpl_items.php?status=send-failed");
+        }
+        exit;
+    }
+
+    //send MPL item to other team via link (draft -> pending)
+    if (isset($_GET['send_mpl_id'])) {
+        $mpl_id = intval($_GET['send_mpl_id']);
+
+        if ($mpl_id <= 0) {
+            header("Location: ../mpl_items.php?status=send-failed");
+            exit;
+        }
+
+        $package_stmt = $connection->prepare("SELECT reference_numb, ship_date, trailer_name FROM mpl_shipping_list WHERE id=? AND status='draft' LIMIT 1");
+        $package_stmt->bind_param("i", $mpl_id);
+        $package_stmt->execute();
+        $package_result = $package_stmt->get_result();
+        $package = $package_result ? $package_result->fetch_assoc() : null;
+
+        if (!$package) {
+            header("Location: ../mpl_items.php?status=send-failed");
+            exit;
+        }
+
+        $stmt = $connection->prepare("UPDATE mpl_shipping_list SET status='pending' WHERE reference_numb=? AND ship_date=? AND trailer_name=? AND status='draft'");
+        $stmt->bind_param("iss", $package['reference_numb'], $package['ship_date'], $package['trailer_name']);
+
+        if ($stmt->execute() && $stmt->affected_rows > 0) {
+            header("Location: ../mpl_items.php?status=sent");
+        } else {
+            header("Location: ../mpl_items.php?status=send-failed");
+        }
+        exit;
+    }
+
+    //accept MPL item (pending -> accepted)
+    if (isset($_POST['accept_mpl_btn'])) {
+        $mpl_id = intval($_POST['mpl_id'] ?? 0);
+
+        if ($mpl_id <= 0) {
+            header("Location: ../mpl_items.php?status=accept-failed");
+            exit;
+        }
+
+        $stmt = $connection->prepare("UPDATE mpl_shipping_list SET status='accepted' WHERE id=? AND status='pending'");
+        $stmt->bind_param("i", $mpl_id);
+
+        if ($stmt->execute() && $stmt->affected_rows > 0) {
+            header("Location: ../mpl_items.php?status=accepted");
+        } else {
+            header("Location: ../mpl_items.php?status=accept-failed");
+        }
+        exit;
+    }
+
+    //accept MPL item via link (pending -> accepted)
+    if (isset($_GET['accept_mpl_id'])) {
+        $mpl_id = intval($_GET['accept_mpl_id']);
+
+        if ($mpl_id <= 0) {
+            header("Location: ../mpl_items.php?status=accept-failed");
+            exit;
+        }
+
+        $stmt = $connection->prepare("UPDATE mpl_shipping_list SET status='accepted' WHERE id=? AND status='pending'");
+        $stmt->bind_param("i", $mpl_id);
+
+        if ($stmt->execute() && $stmt->affected_rows > 0) {
+            header("Location: ../mpl_items.php?status=accepted");
+        } else {
+            header("Location: ../mpl_items.php?status=accept-failed");
+        }
+        exit;
+    }
     
     ///sending selected inventory items to order list
         if(isset($_POST['order_list'])) {

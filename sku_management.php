@@ -16,6 +16,21 @@
 </head>
 <body>
     <?php include('header.php'); ?>
+    <?php if (isset($_GET['status']) && in_array($_GET['status'], ['product-added', 'product-updated', 'product-deleted'])) { ?>
+        <div class="dashboard-container">
+            <div class="status-banner status-success">
+                <?php
+                    if ($_GET['status'] === 'product-added') {
+                        echo 'Product added successfully.';
+                    } elseif ($_GET['status'] === 'product-updated') {
+                        echo 'Product updated successfully.';
+                    } elseif ($_GET['status'] === 'product-deleted') {
+                        echo 'Product deleted successfully.';
+                    }
+                ?>
+            </div>
+        </div>
+    <?php } ?>
     <div class="Products">
         <h1>Products</h1>
         <a href="APIs/product-new.php" class="btn">Add New Product</a>

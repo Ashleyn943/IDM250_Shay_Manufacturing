@@ -37,7 +37,7 @@
         if($stmt1->execute() && $stmt2->execute() && $stmt3->execute()){
             echo "Product added successfully";
             $inserted_id = $connection->insert_id;
-            header("Location: ../index.php");
+            header("Location: ../sku_management.php?status=product-added");
         } else {
             echo "Failed to add product";
         }
@@ -67,7 +67,7 @@
         
         if($stmt1->execute() && $stmt2->execute() && $stmt3->execute()){
             echo "Product updated successfully";
-            header("Location: ../index.php");
+            header("Location: ../sku_management.php?status=product-updated");
         } else {
             echo "Failed to update product";
         }
@@ -92,7 +92,7 @@
 
         if($stmt1->execute() && $stmt2->execute() && $stmt3->execute()){
             echo "Product deleted successfully";
-            header("Location: ../index.php");
+            header("Location: ../sku_management.php?status=product-deleted");
             exit;
         } else {
             echo "Failed to delete product";
@@ -125,23 +125,129 @@
         }
     };
 
-    //update existing product [sku table]
+    //update MPL package details (draft only)
     if(isset($_POST['update_mpl_btn'])){
-        $id = intval($_GET['id']);
-        $reference = $_POST['ref_numb'];
-        $ship_date = $_POST['ship_date'];
-        $trailer = $_POST['truck'];
+        $package_id = intval($_POST['package_id'] ?? ($_GET['id'] ?? 0));
+        $reference = intval($_POST['ref_numb'] ?? 0);
+        $ship_date = $_POST['ship_date'] ?? '';
+        $trailer = trim($_POST['truck'] ?? '');
+        $orig_reference = intval($_POST['orig_ref_numb'] ?? 0);
+        $orig_ship_date = $_POST['orig_ship_date'] ?? '';
+        $orig_trailer = $_POST['orig_trailer'] ?? '';
+        $package_status = $_POST['package_status'] ?? '';
 
-        $stmt = $connection->prepare("UPDATE mpl_shipping_list SET reference_numb=?, ship_date=?, trailer_name=? WHERE id=$id");
-        $stmt->bind_param("iis", $reference, $ship_date, $trailer);
+        if ($package_id <= 0 || $reference <= 0 || $ship_date === '' || $trailer === '') {
+            header("Location: ../APIs/mpl-update.php?id=$package_id&status=update-failed");
+            exit;
+        }
+
+        if ($package_status !== 'draft') {
+            header("Location: ../APIs/mpl-update.php?id=$package_id&status=locked");
+            exit;
+        }
+
+        $stmt = $connection->prepare("UPDATE mpl_shipping_list SET reference_numb=?, ship_date=?, trailer_name=? WHERE reference_numb=? AND ship_date=? AND trailer_name=? AND status='draft'");
+        $stmt->bind_param("ississ", $reference, $ship_date, $trailer, $orig_reference, $orig_ship_date, $orig_trailer);
         
         if($stmt->execute()){
-            echo "Item details updated successfully";
-            header("Location: ../mpl_items.php");
+            header("Location: ../APIs/mpl-update.php?id=$package_id&status=updated");
+            exit;
         } else {
-            echo "Failed to update item details";
+            header("Location: ../APIs/mpl-update.php?id=$package_id&status=update-failed");
+            exit;
         }
     };
+
+    //add item to MPL package (draft only)
+    if (isset($_POST['add_mpl_item_btn'])) {
+        $package_id = intval($_POST['package_id'] ?? 0);
+        $new_item_id = intval($_POST['new_item_id'] ?? 0);
+        $reference = intval($_POST['package_ref_numb'] ?? 0);
+        $ship_date = $_POST['package_ship_date'] ?? '';
+        $trailer = $_POST['package_trailer'] ?? '';
+        $package_status = $_POST['package_status'] ?? '';
+
+        if ($package_id <= 0 || $new_item_id <= 0 || $reference <= 0 || $ship_date === '' || $trailer === '') {
+            header("Location: ../APIs/mpl-update.php?id=$package_id&status=add-failed");
+            exit;
+        }
+
+        if ($package_status !== 'draft') {
+            header("Location: ../APIs/mpl-update.php?id=$package_id&status=locked");
+            exit;
+        }
+
+        $check_stmt = $connection->prepare("SELECT id FROM mpl_shipping_list WHERE item_id=? AND reference_numb=? AND ship_date=? AND trailer_name=? LIMIT 1");
+        $check_stmt->bind_param("iiss", $new_item_id, $reference, $ship_date, $trailer);
+        $check_stmt->execute();
+        $check_result = $check_stmt->get_result();
+
+        if ($check_result && $check_result->num_rows > 0) {
+            header("Location: ../APIs/mpl-update.php?id=$package_id&status=add-duplicate");
+            exit;
+        }
+
+        $insert_stmt = $connection->prepare("INSERT INTO mpl_shipping_list (item_id, reference_numb, ship_date, trailer_name, status) VALUES (?, ?, ?, ?, 'draft')");
+        $insert_stmt->bind_param("iiss", $new_item_id, $reference, $ship_date, $trailer);
+
+        if ($insert_stmt->execute()) {
+            header("Location: ../APIs/mpl-update.php?id=$package_id&status=add-success");
+            exit;
+        }
+
+        header("Location: ../APIs/mpl-update.php?id=$package_id&status=add-failed");
+        exit;
+    }
+
+    //remove item from MPL package (draft only)
+    if (isset($_POST['remove_mpl_item_btn'])) {
+        $package_id = intval($_POST['package_id'] ?? 0);
+        $mpl_item_id = intval($_POST['mpl_item_id'] ?? 0);
+        $package_status = $_POST['package_status'] ?? '';
+
+        if ($package_id <= 0 || $mpl_item_id <= 0) {
+            header("Location: ../APIs/mpl-update.php?id=$package_id&status=remove-failed");
+            exit;
+        }
+
+        if ($package_status !== 'draft') {
+            header("Location: ../APIs/mpl-update.php?id=$package_id&status=locked");
+            exit;
+        }
+
+        $stmt = $connection->prepare("DELETE FROM mpl_shipping_list WHERE id=? AND status='draft'");
+        $stmt->bind_param("i", $mpl_item_id);
+
+        if ($stmt->execute() && $stmt->affected_rows > 0) {
+            header("Location: ../APIs/mpl-update.php?id=$package_id&status=remove-success");
+            exit;
+        }
+
+        header("Location: ../APIs/mpl-update.php?id=$package_id&status=remove-failed");
+        exit;
+    }
+
+    //remove item from MPL package via link (draft only)
+    if (isset($_GET['remove_mpl_item_id'])) {
+        $package_id = intval($_GET['package_id'] ?? 0);
+        $mpl_item_id = intval($_GET['remove_mpl_item_id'] ?? 0);
+
+        if ($package_id <= 0 || $mpl_item_id <= 0) {
+            header("Location: ../APIs/mpl-update.php?id=$package_id&status=remove-failed");
+            exit;
+        }
+
+        $stmt = $connection->prepare("DELETE FROM mpl_shipping_list WHERE id=? AND status='draft'");
+        $stmt->bind_param("i", $mpl_item_id);
+
+        if ($stmt->execute() && $stmt->affected_rows > 0) {
+            header("Location: ../APIs/mpl-update.php?id=$package_id&status=remove-success");
+            exit;
+        }
+
+        header("Location: ../APIs/mpl-update.php?id=$package_id&status=remove-failed");
+        exit;
+    }
     
     ///sending selected inventory items to order list
         if(isset($_POST['order_list'])) {

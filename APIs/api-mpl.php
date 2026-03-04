@@ -56,6 +56,30 @@
         $json_input = json_decode($raw_input, true);
         $input = is_array($json_input) ? $json_input : $_POST;
 
+        $update_id = isset($input['id']) ? intval($input['id']) : 0;
+        $requested_status = strtolower(trim($input['status'] ?? ''));
+
+        if ($update_id > 0 && in_array($requested_status, ['pending', 'accepted'])) {
+            $stmt = $connection->prepare("UPDATE mpl_shipping_list SET status=? WHERE id=?");
+            $stmt->bind_param("si", $requested_status, $update_id);
+
+            if ($stmt->execute()) {
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'MPL status updated',
+                    'id' => $update_id,
+                    'status' => $requested_status
+                ]);
+                $stmt->close();
+                exit;
+            }
+
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Failed to update status: ' . $stmt->error]);
+            $stmt->close();
+            exit;
+        }
+
         $reference_numb = isset($input['reference_number'])
             ? intval($input['reference_number'])
             : (isset($input['reference_numb']) ? intval($input['reference_numb']) : (isset($input['reference']) ? intval($input['reference']) : 0));

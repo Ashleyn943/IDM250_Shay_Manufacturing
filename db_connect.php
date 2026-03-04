@@ -1,4 +1,10 @@
 <?php
+    require_once(__DIR__ . '/session_config.php');
+
+    if (!is_api_request()) {
+        require_auth();
+    }
+
     $env_file = __DIR__ . '/.env.php';
     $env = file_exists($env_file) ? require $env_file : [];
 
