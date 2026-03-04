@@ -1,11 +1,10 @@
 <?php
-    //header('Content-Type: application/json');
-    //header('Access-Control-Allow-Origin: *');
     require_once('db_connect.php');
 
     // Fetch counts for the summary cards
     $sku_count = mysqli_num_rows(mysqli_query($connection, "SELECT id FROM products"));
-    $inventory_count = mysqli_num_rows(mysqli_query($connection, "SELECT inventory_id FROM inventory_item_info"));
+    $internal_count = mysqli_num_rows(mysqli_query($connection, "SELECT id FROM inventory_item_info WHERE location='internal'"));
+    $warehouse_count = mysqli_num_rows(mysqli_query($connection, "SELECT id FROM inventory_item_info WHERE location='warehouse'"));
 ?>
 
 <!DOCTYPE html>
@@ -13,14 +12,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
     <link rel="stylesheet" href="css/stylesheet.css">
     <link rel="stylesheet" href="css/nav.css">
     <link rel="icon" href="media/ShayIcon.png" type="image/x-icon">
-    <title>Home</title>
 </head>
 <body>
-    <?php include('header.php'); ?>
-
+    <?php include_once('header.php'); ?>
     <div class="dashboard-container">
     <h1>Dashboard</h1>
 
@@ -31,11 +29,11 @@
         </div>
         <div class="card">
             <h3>Internal Inventory</h3>
-            <p class="stat-number"><?php echo $inventory_count; ?></p>
+            <p class="stat-number"><?php echo $internal_count; ?></p>
         </div>
         <div class="card">
             <h3>Warehouse Inventory</h3>
-            <p class="stat-number">0</p>
+            <p class="stat-number"><?php echo $warehouse_count; ?></p>
         </div>
     </div>
 
@@ -57,6 +55,6 @@
         <h2>Recent Orders</h2>
         <p class="empty-msg">No order records found.</p>
     </div>
-    </div>
+</div>
 </body>
 </html>
