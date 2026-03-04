@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Feb 16, 2026 at 07:46 PM
+-- Generation Time: Feb 18, 2026 at 02:09 PM
 -- Server version: 5.7.24
 -- PHP Version: 8.3.1
 
@@ -57,6 +57,80 @@ CREATE TABLE `inventory_item_info` (
 --
 
 INSERT INTO `inventory_item_info` (`inventory_id`, `sku`, `unit_numb`, `ficha`, `description1`, `description2`, `quantity`, `quantity_unit`, `footage_quantity`, `location`) VALUES
+(1, '1720818-0167', 78114995, 223, 'MAPLE HARD FAS 5/4 RGH KD 10FT', 'Medex FSCMC 120', 120, 'PC', 1320.28, 'warehouse'),
+(2, '1720818-0167', 78114996, 223, 'MAPLE HARD FAS 5/4 RGH KD 10FT', 'Medex FSCMC 120', 120, 'PC', 1320.28, 'warehouse'),
+(3, '1720818-0167', 78114997, 223, 'MAPLE HARD FAS 5/4 RGH KD 10FT', 'Medex FSCMC 120', 120, 'PC', 1320.28, 'warehouse'),
+(4, '1720818-0167', 78114998, 223, 'MAPLE HARD FAS 5/4 RGH KD 10FT', 'Medex FSCMC 120', 120, 'PC', 1320.28, 'warehouse'),
+(5, '1720818-0167', 78114999, 223, 'MAPLE HARD FAS 5/4 RGH KD 10FT', 'Medex FSCMC 120', 120, 'PC', 1320.28, 'warehouse'),
+(6, '1720818-0167', 78115000, 223, 'MAPLE HARD FAS 5/4 RGH KD 10FT', 'Medex FSCMC 120', 120, 'PC', 1320.28, 'warehouse'),
+(7, '1720818-0167', 78115001, 223, 'MAPLE HARD FAS 5/4 RGH KD 10FT', 'Medex FSCMC 120', 120, 'PC', 1320.28, 'internal'),
+(8, '1720818-0167', 78115002, 223, 'MAPLE HARD FAS 5/4 RGH KD 10FT', 'Medex FSCMC 120', 120, 'PC', 1320.28, 'internal'),
+(9, '1720818-0167', 78115003, 223, 'MAPLE HARD FAS 5/4 RGH KD 10FT', 'Medex FSCMC 120', 120, 'PC', 1320.28, 'internal'),
+(10, '1720818-0167', 78115004, 223, 'MAPLE HARD FAS 5/4 RGH KD 10FT', 'Medex FSCMC 120', 120, 'PC', 1320.28, 'internal'),
+(11, '1720818-0167', 78115005, 223, 'MAPLE HARD FAS 5/4 RGH KD 10FT', 'Medex FSCMC 120', 120, 'PC', 1320.28, 'internal'),
+(12, '1720818-0167', 78115006, 223, 'MAPLE HARD FAS 5/4 RGH KD 10FT', 'Medex FSCMC 120', 120, 'PC', 1320.28, 'internal'),
+(13, '1720818-0167', 78115007, 223, 'MAPLE HARD FAS 5/4 RGH KD 10FT', 'Medex FSCMC 120', 120, 'PC', 1320.28, 'internal'),
+(14, '1720818-0167', 78115008, 223, 'MAPLE HARD FAS 5/4 RGH KD 10FT', 'Medex FSCMC 120', 120, 'PC', 1320.28, 'internal'),
+(15, '1720818-0167', 78115009, 223, 'MAPLE HARD FAS 5/4 RGH KD 10FT', 'Medex FSCMC 120', 120, 'PC', 1320.28, 'internal'),
+(16, '1720823-0011', 78115010, 547, 'PINE #2 2X4X10FT KD', 'Medex HB 220', 220, 'PC', 1420.34, 'internal'),
+(17, '1720823-0011', 78115011, 547, 'PINE #2 2X4X10FT KD', 'Medex HB 220', 220, 'PC', 1420.34, 'internal'),
+(18, '1720823-0011', 78115012, 547, 'PINE #2 2X4X10FT KD', 'Medex HB 220', 220, 'PC', 1420.34, 'internal'),
+(19, '1720823-0011', 78115013, 547, 'PINE #2 2X4X10FT KD', 'Medex HB 220', 220, 'PC', 1420.34, 'internal'),
+(20, '1720823-0011', 78115014, 547, 'PINE #2 2X4X10FT KD', 'Medex HB 220', 220, 'PC', 1420.34, 'internal'),
+(21, '1720823-0011', 78115015, 547, 'PINE #2 2X4X10FT KD', 'Medex HB 220', 220, 'PC', 1420.34, 'internal'),
+(22, '1720823-0011', 78115016, 547, 'PINE #2 2X4X10FT KD', 'Medex HB 220', 220, 'PC', 1420.34, 'internal'),
+(23, '1720823-0011', 78115017, 547, 'PINE #2 2X4X10FT KD', 'Medex HB 220', 220, 'PC', 1420.34, 'internal'),
+(24, '1720823-0011', 78115018, 547, 'PINE #2 2X4X10FT KD', 'Medex HB 220', 220, 'PC', 1420.34, 'internal'),
+(25, '1720823-0011', 78115019, 547, 'PINE #2 2X4X10FT KD', 'Medex HB 220', 220, 'PC', 1420.34, 'internal'),
+(26, '1720823-0011', 78115020, 547, 'PINE #2 2X4X10FT KD', 'Medex HB 220', 220, 'PC', 1420.34, 'internal'),
+(27, '1720823-0011', 78115021, 547, 'PINE #2 2X4X10FT KD', 'Medex HB 220', 220, 'PC', 1420.34, 'internal'),
+(28, '1720823-0011', 78115022, 547, 'PINE #2 2X4X10FT KD', 'Medex HB 220', 220, 'PC', 1420.34, 'internal'),
+(29, '1720823-0011', 78115023, 547, 'PINE #2 2X4X10FT KD', 'Medex HB 220', 220, 'PC', 1420.34, 'internal'),
+(30, '1720830-0108', 78115024, 886, 'CEDAR WRC 1X8X10FT CLR S4S', 'Medex PLY S4S', 280, 'PC', 2100, 'internal'),
+(31, '1720830-0108', 78115025, 886, 'CEDAR WRC 1X8X10FT CLR S4S', 'Medex PLY S4S', 280, 'PC', 2100, 'internal'),
+(32, '1720830-0108', 78115026, 886, 'CEDAR WRC 1X8X10FT CLR S4S', 'Medex PLY S4S', 280, 'PC', 2100, 'internal'),
+(33, '1720830-0108', 78115027, 886, 'CEDAR WRC 1X8X10FT CLR S4S', 'Medex PLY S4S', 280, 'PC', 2100, 'internal'),
+(34, '1720830-0108', 78115028, 886, 'CEDAR WRC 1X8X10FT CLR S4S', 'Medex PLY S4S', 280, 'PC', 2100, 'internal'),
+(35, '1720830-0108', 78115029, 886, 'CEDAR WRC 1X8X10FT CLR S4S', 'Medex PLY S4S', 280, 'PC', 2100, 'internal'),
+(36, '1720830-0108', 78115030, 886, 'CEDAR WRC 1X8X10FT CLR S4S', 'Medex PLY S4S', 280, 'PC', 2100, 'internal'),
+(37, '1720830-0108', 78115031, 886, 'CEDAR WRC 1X8X10FT CLR S4S', 'Medex PLY S4S', 280, 'PC', 2100, 'internal'),
+(38, '1720830-0108', 78115032, 886, 'CEDAR WRC 1X8X10FT CLR S4S', 'Medex PLY S4S', 280, 'PC', 2100, 'internal'),
+(39, '1720830-0108', 78115033, 886, 'CEDAR WRC 1X8X10FT CLR S4S', 'Medex PLY S4S', 280, 'PC', 2100, 'internal'),
+(40, '1720830-0108', 78115034, 886, 'CEDAR WRC 1X8X10FT CLR S4S', 'Medex PLY S4S', 280, 'PC', 2100, 'internal'),
+(41, '1720830-0108', 78115035, 886, 'CEDAR WRC 1X8X10FT CLR S4S', 'Medex PLY S4S', 280, 'PC', 2100, 'internal'),
+(42, '1720830-0108', 78115036, 886, 'CEDAR WRC 1X8X10FT CLR S4S', 'Medex PLY S4S', 280, 'PC', 2100, 'internal'),
+(43, '1720830-0108', 78115037, 886, 'CEDAR WRC 1X8X10FT CLR S4S', 'Medex PLY S4S', 280, 'PC', 2100, 'internal'),
+(44, '1720830-0108', 78115038, 886, 'CEDAR WRC 1X8X10FT CLR S4S', 'Medex PLY S4S', 280, 'PC', 2100, 'internal'),
+(45, '1720822-0223', 78115039, 901, 'DOUGLAS FIR CVG 2X10X16FT #1', NULL, 100, 'PC', 3298.34, 'internal'),
+(46, '1720822-0223', 78115040, 901, 'DOUGLAS FIR CVG 2X10X16FT #1', NULL, 100, 'PC', 3298.34, 'internal'),
+(47, '1720822-0223', 78115041, 901, 'DOUGLAS FIR CVG 2X10X16FT #1', NULL, 100, 'PC', 3298.34, 'internal'),
+(48, '1720822-0223', 78115042, 901, 'DOUGLAS FIR CVG 2X10X16FT #1', NULL, 100, 'PC', 3298.34, 'internal'),
+(49, '1720822-0223', 78115043, 901, 'DOUGLAS FIR CVG 2X10X16FT #1', NULL, 100, 'PC', 3298.34, 'internal');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `inventory_item_info_ref`
+--
+
+CREATE TABLE `inventory_item_info_ref` (
+  `inventory_id` int(100) NOT NULL,
+  `sku` varchar(100) DEFAULT NULL,
+  `unit_numb` int(15) DEFAULT NULL,
+  `ficha` int(11) DEFAULT NULL,
+  `description1` text,
+  `description2` text,
+  `quantity` int(15) NOT NULL,
+  `quantity_unit` varchar(10) NOT NULL,
+  `footage_quantity` float NOT NULL,
+  `location` text
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `inventory_item_info_ref`
+--
+
+INSERT INTO `inventory_item_info_ref` (`inventory_id`, `sku`, `unit_numb`, `ficha`, `description1`, `description2`, `quantity`, `quantity_unit`, `footage_quantity`, `location`) VALUES
 (1, '1720818-0167', 78114995, 223, 'MAPLE HARD FAS 5/4 RGH KD 10FT', 'Medex FSCMC 120', 120, 'PC', 1320.28, 'internal'),
 (2, '1720818-0167', 78114996, 223, 'MAPLE HARD FAS 5/4 RGH KD 10FT', 'Medex FSCMC 120', 120, 'PC', 1320.28, 'internal'),
 (3, '1720818-0167', 78114997, 223, 'MAPLE HARD FAS 5/4 RGH KD 10FT', 'Medex FSCMC 120', 120, 'PC', 1320.28, 'internal'),
@@ -190,6 +264,33 @@ INSERT INTO `inventory_ship_info` (`shipment_id`, `unit_numb`, `request_date`, `
 --
 
 CREATE TABLE `mpl_shipping_list` (
+  `id` int(100) NOT NULL,
+  `item_id` int(100) DEFAULT NULL,
+  `reference_numb` int(100) DEFAULT NULL,
+  `ship_date` date DEFAULT NULL,
+  `trailer_name` text,
+  `status` text
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `mpl_shipping_list`
+--
+
+INSERT INTO `mpl_shipping_list` (`id`, `item_id`, `reference_numb`, `ship_date`, `trailer_name`, `status`) VALUES
+(17, 1, 123123, '2026-02-19', 'TestTruck', 'draft'),
+(18, 2, 123123, '2026-02-19', 'TestTruck', 'draft'),
+(19, 3, 123123, '2026-02-19', 'TestTruck', 'draft'),
+(20, 4, 123123, '2026-02-19', 'TestTruck', 'draft'),
+(21, 5, 123123, '2026-02-19', 'TestTruck', 'draft'),
+(22, 6, 123123, '2026-02-19', 'TestTruck', 'draft');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `order_list`
+--
+
+CREATE TABLE `order_list` (
   `id` int(100) NOT NULL,
   `sku` varchar(100) DEFAULT NULL,
   `unit_numb` int(100) DEFAULT NULL,
@@ -372,6 +473,12 @@ ALTER TABLE `inventory_item_info`
   ADD PRIMARY KEY (`inventory_id`);
 
 --
+-- Indexes for table `inventory_item_info_ref`
+--
+ALTER TABLE `inventory_item_info_ref`
+  ADD PRIMARY KEY (`inventory_id`);
+
+--
 -- Indexes for table `inventory_ship_info`
 --
 ALTER TABLE `inventory_ship_info`
@@ -381,6 +488,12 @@ ALTER TABLE `inventory_ship_info`
 -- Indexes for table `mpl_shipping_list`
 --
 ALTER TABLE `mpl_shipping_list`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `order_list`
+--
+ALTER TABLE `order_list`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -418,6 +531,12 @@ ALTER TABLE `inventory_item_info`
   MODIFY `inventory_id` int(100) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
 
 --
+-- AUTO_INCREMENT for table `inventory_item_info_ref`
+--
+ALTER TABLE `inventory_item_info_ref`
+  MODIFY `inventory_id` int(100) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
+
+--
 -- AUTO_INCREMENT for table `inventory_ship_info`
 --
 ALTER TABLE `inventory_ship_info`
@@ -427,6 +546,12 @@ ALTER TABLE `inventory_ship_info`
 -- AUTO_INCREMENT for table `mpl_shipping_list`
 --
 ALTER TABLE `mpl_shipping_list`
+  MODIFY `id` int(100) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+
+--
+-- AUTO_INCREMENT for table `order_list`
+--
+ALTER TABLE `order_list`
   MODIFY `id` int(100) NOT NULL AUTO_INCREMENT;
 
 --
