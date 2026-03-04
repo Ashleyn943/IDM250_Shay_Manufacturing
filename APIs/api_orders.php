@@ -73,7 +73,7 @@
                 $date, 
                 $trailer, 
                 $row['ficha'], 
-                $row['unit_number'], 
+                $row['unit_numb'], 
                 $row['uom_primary']
             );
 

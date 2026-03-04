@@ -15,8 +15,9 @@
     <title>Shipping List</title>
 </head>
 <body>
-       <?php include('header.php'); ?>
+    <?php include('header.php'); ?>
     <div class="dashboard-container">
+    <h1>Select Stock to be Shipped</h1>
     <?php if (isset($_GET['status']) && $_GET['status'] === 'success') { ?>
         <div class="status-banner status-success">
             Shipping list saved. Selected items were added to the MPL shipping list.
@@ -27,7 +28,7 @@
         </div>
     <?php } ?>
     <div class="form-section">
-        <h1>Select Stock to be Shipped</h1>
+        
         <form method="POST" action="library/cms.php">
             <div class="form-group">
                 <label for="reference">Reference Number</label>
@@ -66,8 +67,8 @@
                             echo "<td>" . htmlspecialchars($row['inventory_id'] ?? '') . "</td>";
                             echo "<td>" . htmlspecialchars($row['unit_numb'] ?? '') . "</td>";
                             echo "<td>" . htmlspecialchars($row['ficha'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['description_1'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['description_2'] ?? '') . "</td>";
+                            echo "<td>" . htmlspecialchars($row['description1'] ?? '') . "</td>";
+                            echo "<td>" . htmlspecialchars($row['description2'] ?? '') . "</td>";
                             echo "<td>" . htmlspecialchars($row['quantity'] ?? '') . "</td>";
                             echo "<td>" . htmlspecialchars($row['quantity_unit'] ?? '') . "</td>";
                             echo "<td>" . htmlspecialchars($row['footage_quantity'] ?? '') . "</td>";
