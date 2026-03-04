@@ -49,44 +49,97 @@
 
         $data = mysqli_fetch_all($results, MYSQLI_ASSOC);
 
-        echo json_encode([
-            'success' => true,
-            'count' => count($data),
-            'data' => $data
-        ]);
+        echo json_encode($data);
 
     } elseif ($method === 'POST') {
-        // Create new shipping record
         $raw_input = file_get_contents('php://input');
         $json_input = json_decode($raw_input, true);
         $input = is_array($json_input) ? $json_input : $_POST;
 
-        $item_id = isset($input['item_id']) ? intval($input['item_id']) : 0;
-        $reference_numb = isset($input['reference_number']) ? intval($input['reference_number']) : (isset($input['reference_numb']) ? intval($input['reference_numb']) : 0);
+        $reference_numb = isset($input['reference_number'])
+            ? intval($input['reference_number'])
+            : (isset($input['reference_numb']) ? intval($input['reference_numb']) : (isset($input['reference']) ? intval($input['reference']) : 0));
         $ship_date = $input['ship_date'] ?? ($input['date'] ?? '');
         $trailer_name = $input['trailer_name'] ?? ($input['truck'] ?? '');
         $status = $input['status'] ?? 'pending';
+        $selected_items = (isset($input['selected_items']) && is_array($input['selected_items'])) ? $input['selected_items'] : [];
 
-        if ($item_id <= 0 || $reference_numb <= 0 || $ship_date === '' || $trailer_name === '') {
+        if ($reference_numb <= 0 || $ship_date === '' || $trailer_name === '') {
             http_response_code(400);
-            echo json_encode(['success' => false, 'error' => 'Missing required fields: item_id, reference_number/reference_numb, ship_date/date, trailer_name/truck']);
+            echo json_encode(['success' => false, 'error' => 'Missing required fields: reference_number/reference_numb/reference, ship_date/date, trailer_name/truck']);
             exit;
         }
 
-        $stmt = $connection->prepare("INSERT INTO mpl_shipping_list (item_id, reference_numb, ship_date, trailer_name, status) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("iisss", $item_id, $reference_numb, $ship_date, $trailer_name, $status);
+        try {
+            $stmt = $connection->prepare("INSERT INTO mpl_shipping_list (item_id, reference_numb, ship_date, trailer_name, status) VALUES (?, ?, ?, ?, ?)");
 
-        if ($stmt->execute()) {
+            if (!$stmt) {
+                http_response_code(500);
+                echo json_encode(['success' => false, 'error' => 'Failed to prepare insert statement']);
+                exit;
+            }
+
+            $created_ids = [];
+
+            if (count($selected_items) > 0) {
+                foreach ($selected_items as $shipID) {
+                    $item_id = intval($shipID);
+
+                    if ($item_id <= 0) {
+                        continue;
+                    }
+
+                    $stmt->bind_param("iisss", $item_id, $reference_numb, $ship_date, $trailer_name, $status);
+
+                    if (!$stmt->execute()) {
+                        http_response_code(500);
+                        echo json_encode(['success' => false, 'error' => 'Failed to insert record: ' . $stmt->error]);
+                        $stmt->close();
+                        exit;
+                    }
+
+                    $created_ids[] = $connection->insert_id;
+                }
+            } else {
+                $item_id = isset($input['item_id']) ? intval($input['item_id']) : 0;
+
+                if ($item_id <= 0) {
+                    http_response_code(400);
+                    echo json_encode(['success' => false, 'error' => 'Missing required field: item_id or selected_items']);
+                    $stmt->close();
+                    exit;
+                }
+
+                $stmt->bind_param("iisss", $item_id, $reference_numb, $ship_date, $trailer_name, $status);
+
+                if (!$stmt->execute()) {
+                    http_response_code(500);
+                    echo json_encode(['success' => false, 'error' => 'Failed to insert record: ' . $stmt->error]);
+                    $stmt->close();
+                    exit;
+                }
+
+                $created_ids[] = $connection->insert_id;
+            }
+
+            $stmt->close();
+
+            if (count($created_ids) === 0) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'No valid item IDs were provided']);
+                exit;
+            }
+
             echo json_encode([
                 'success' => true,
-                'message' => 'Shipping record created',
-                'id' => $connection->insert_id
+                'message' => 'Shipping record(s) created',
+                'count' => count($created_ids),
+                'ids' => $created_ids
             ]);
-            $stmt->close();
-        } else {
+        } catch (Exception $e) {
             http_response_code(500);
-            echo json_encode(['success' => false, 'error' => 'Failed to insert record: ' . $stmt->error]);
-            $stmt->close();
+            echo json_encode(['success' => false, 'error' => 'Server error: ' . $e->getMessage()]);
+            exit;
         }
 
     } else {

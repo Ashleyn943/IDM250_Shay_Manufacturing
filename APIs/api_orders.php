@@ -1,14 +1,22 @@
 <?php
     header('Content-Type: application/json');
     header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Headers: Content-Type, X-API-KEY');
+    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 
     require_once('../db_connect.php');
     require_once('../library/auth.php');
 
+    $env_file = __DIR__ . '/../.env.php';
+    $env = file_exists($env_file) ? require $env_file : [];
+
+    if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+        http_response_code(204);
+        exit;
+    }
+
     check_api_key($env);
 
-    $url = 'https://digmstudents.westphal.drexel.edu/~ckl49/idm250-csquaredwms/api/orders.php';
-    $api_key = getenv('API_KEY');
     $method = $_SERVER['REQUEST_METHOD'];
 
 
@@ -100,27 +108,15 @@
     echo json_encode(['error' => $e->getMessage()]);
     exit;}
         
-        $data = [
-            'reference' => $reference, 
-            'date' => $date, 
-            'trailer' => $trailer, 
-            'selected_items' => $selected_items
-        ];
-
-        $options = [
-            'http' =>  [
-                'method' => $method,
-                'header' => 'X-API-KEY:' . $api_key . "\r\n" .
-                    'Content-Type: application/json',
-                    'content' => json_encode($data)
+        echo json_encode([
+            'success' => true,
+            'data' => [
+                'reference' => $reference,
+                'date' => $date,
+                'trailer' => $trailer,
+                'selected_items' => $selected_items
             ]
-        ];
-        
-        $context  = stream_context_create($options);
-        $response = @file_get_contents($url, false, $context);
-        $result   = json_decode($response, true);
-
-        echo json_encode(['success' => true, 'data' => $data]);
+        ]);
     } else {
         http_response_code(405);
         echo json_encode(['error' => 'Method Not Allowed']);
