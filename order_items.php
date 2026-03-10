@@ -79,6 +79,9 @@
 </head>
 <body>
     <?php include('header.php'); ?>
+    <div class="dashboard-container">
+        <h1>Order List Items</h1>
+
         <?php if (isset($_GET['status']) && $_GET['status'] === 'deleted') { ?>
             <div class="status-banner status-success">
                 Order item deleted successfully.
@@ -100,14 +103,11 @@
                 Unable to accept item. It may no longer be in pending status.
             </div>
         <?php } ?>
-    <div class="dashboard-container">
-        <h1>Order List Items</h1>
 
         <div class="section-container">
             <h2>Actions</h2>
             <div class="button-group">
                 <a href="order.php" class="btn">Create New Order</a>
-                <a href="APIs/api-orders.php" class="btn">Send Order</a>
             </div>
         </div>
 
@@ -191,7 +191,7 @@
                                 $package_index++;
                             }
                     } else {
-                        echo "<tr><td colspan='5'>No MPL shipping records found.</td></tr>";
+                        echo "<tr><td colspan='9'>No MPL shipping records found.</td></tr>";
                     }
                     ?>
                 </table>

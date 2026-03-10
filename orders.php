@@ -27,12 +27,6 @@
 
         <?php if (isset($_GET['status']) && $_GET['status'] === 'success') { ?>
             <div class="status-banner status-success">
-                Order item(s) added to order list successfully.
-            </div>
-        <?php } ?>
-
-        <?php if (isset($_GET['status']) && $_GET['status'] === 'success') { ?>
-            <div class="status-banner status-success">
                 Order saved. Selected items were added to the order list.
             </div>
         <?php } elseif (isset($_GET['status']) && $_GET['status'] === 'missing') { ?>
