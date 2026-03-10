@@ -1,6 +1,8 @@
 <?php
     require_once('db_connect.php');
     require_once('library/cms.php');
+    require_once('session_config.php');
+    require_auth();
 ?>
 
 <!DOCTYPE html>

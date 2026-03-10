@@ -1,11 +1,11 @@
 <?php
     require_once('../db_connect.php');
     //require_once('../library/auth.php');
-    require_once('../library/cms_alt.php');
+    require_once('../library/cms.php');
 
     $id = intval($_GET['id'] ?? 0);
 
-    $package_stmt = $connection->prepare("SELECT id, reference_numb, ship_date, trailer_name, status FROM mpl_shipping_list WHERE id=? LIMIT 1");
+    $package_stmt = $connection->prepare("SELECT id, reference_numb, ship_date, trailer_name, address, zip_code, city, state, status FROM order_list WHERE id=?");
     $package_stmt->bind_param("i", $id);
     $package_stmt->execute();
     $package_result = $package_stmt->get_result();
@@ -13,17 +13,34 @@
 
     if (!$package_row) {
         http_response_code(404);
-        echo "MPL package not found.";
+        echo "Order not found.";
         exit;
     }
 
     $package_ref = $package_row['reference_numb'];
     $package_ship_date = $package_row['ship_date'];
     $package_trailer = $package_row['trailer_name'];
+    $package_address = $package_row['address'];
+    $package_zip = $package_row['zip_code'];
+    $package_city = $package_row['city'];
+    $package_state = $package_row['state'];
     $package_status = $package_row['status'];
 
-    $items_stmt = $connection->prepare("SELECT mplship.id, mplship.item_id, iii.unit_numb, iii.ficha, iii.description1, iii.description2, iii.quantity, iii.quantity_unit, iii.footage_quantity FROM mpl_shipping_list mplship INNER JOIN inventory_item_info iii ON mplship.item_id = iii.inventory_id WHERE mplship.reference_numb=? AND mplship.ship_date=? AND mplship.trailer_name=? AND mplship.status=? ORDER BY mplship.id ASC");
-    $items_stmt->bind_param("isss", $package_ref, $package_ship_date, $package_trailer, $package_status);
+    $items_stmt = $connection->prepare("SELECT 
+                                                ordership.id, 
+                                                ordership.item_id, 
+                                                iii.unit_numb, 
+                                                iii.ficha, 
+                                                iii.description1, 
+                                                iii.description2, 
+                                                iii.quantity, 
+                                                iii.quantity_unit, 
+                                                iii.footage_quantity 
+                                                FROM order_list ordership 
+                                                INNER JOIN inventory_item_info iii ON ordership.item_id = iii.inventory_id 
+                                                WHERE ordership.reference_numb=? AND ordership.ship_date=? AND ordership.trailer_name=? AND ordership.address=? AND ordership.zip_code=? AND ordership.city=? AND ordership.state=? AND ordership.status=? 
+                                                ORDER BY ordership.id ASC");
+    $items_stmt->bind_param("isssisss", $package_ref, $package_ship_date, $package_trailer, $package_address, $package_zip, $package_city, $package_state, $package_status);
     $items_stmt->execute();
     $items_result = $items_stmt->get_result();
     $package_items = [];
@@ -31,8 +48,17 @@
         $package_items[] = $item;
     }
 
-    $available_items_stmt = $connection->prepare("SELECT iii.inventory_id, iii.unit_numb, iii.ficha, iii.description1, iii.description2 FROM inventory_item_info iii WHERE iii.location='internal' AND iii.inventory_id NOT IN (SELECT item_id FROM mpl_shipping_list WHERE reference_numb=? AND ship_date=? AND trailer_name=?) ORDER BY iii.inventory_id ASC");
-    $available_items_stmt->bind_param("iss", $package_ref, $package_ship_date, $package_trailer);
+    $available_items_stmt = $connection->prepare("SELECT 
+                                                            iii.inventory_id, 
+                                                            iii.unit_numb, 
+                                                            iii.ficha, 
+                                                            iii.description1, 
+                                                            iii.description2 
+                                                            FROM inventory_item_info iii 
+                                                            WHERE iii.location='warehouse' AND iii.inventory_id 
+                                                            NOT IN (SELECT item_id FROM order_list ordership WHERE reference_numb=? AND ship_date=? AND trailer_name=? AND ordership.address=? AND ordership.zip_code=? AND ordership.city=? AND ordership.state=?) 
+                                                            ORDER BY iii.inventory_id ASC");
+    $available_items_stmt->bind_param("isssiss", $package_ref, $package_ship_date, $package_trailer, $package_address, $package_zip, $package_city, $package_state);
     $available_items_stmt->execute();
     $available_items_result = $available_items_stmt->get_result();
 ?>
@@ -46,13 +72,13 @@
     <link rel="stylesheet" href="../css/nav.css">
     <link rel="stylesheet" href="../css/normalize.css">
     <link rel="icon" href="../media/ShayIcon.png" type="image/x-icon">
-    <title>Update Master Packing List</title>
+    <title>Update Order</title>
 </head>
 <body>
     <?php include('../header_alt.php'); ?>
     <div class="dashboard-container">
         <div class="form-card-centered">
-            <h1>Edit MPL Package</h1>
+            <h1>Edit Order Package</h1>
             <p class="form-instruction">Update package details and add/remove items before sending.</p>
 
             <?php if (isset($_GET['status']) && $_GET['status'] === 'updated') { ?>
@@ -74,6 +100,10 @@
                 <input type="hidden" name="orig_ref_numb" value="<?php echo htmlspecialchars($package_ref); ?>">
                 <input type="hidden" name="orig_ship_date" value="<?php echo htmlspecialchars($package_ship_date); ?>">
                 <input type="hidden" name="orig_trailer" value="<?php echo htmlspecialchars($package_trailer); ?>">
+                <input type="hidden" name="orig_address" value="<?php echo htmlspecialchars($package_address); ?>">
+                <input type="hidden" name="orig_zip" value="<?php echo htmlspecialchars($package_zip); ?>">
+                <input type="hidden" name="orig_city" value="<?php echo htmlspecialchars($package_city); ?>">
+                <input type="hidden" name="orig_state" value="<?php echo htmlspecialchars($package_state); ?>">
                 <input type="hidden" name="package_status" value="<?php echo htmlspecialchars($package_status); ?>">
 
                 <div class="form-grid">
@@ -89,12 +119,28 @@
                         <label for="truck">Vehicle Name</label>
                         <input type="text" name="truck" value="<?php echo htmlspecialchars($package_trailer); ?>" required>
                     </div>
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <input type="text" name="address" value="<?php echo htmlspecialchars($package_address); ?>" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="zip">Zip Code</label>
+                        <input type="text" name="zip" value="<?php echo htmlspecialchars($package_zip); ?>" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="city">City</label>
+                        <input type="text" name="city" value="<?php echo htmlspecialchars($package_city); ?>" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="state">State</label>
+                        <input type="text" name="state" value="<?php echo htmlspecialchars($package_state); ?>" required>
+                    </div>
                 </div>
 
                 <div class="form-footer-actions">
-                    <a href="../mpl_items.php" class="cancel-link">Cancel</a>
+                    <a href="../order_items.php" class="cancel-link">Cancel</a>
                     <?php if ($package_status === 'draft') { ?>
-                        <button type="submit" name="update_mpl_btn" class="btn">Update Package Details</button>
+                        <button type="submit" name="update_order_btn" class="btn">Update Package Details</button>
                     <?php } ?>
                 </div>
             </form>
@@ -123,7 +169,7 @@
                             echo "<td>" . htmlspecialchars($item['footage_quantity']) . "</td>";
                             echo "<td>";
                             if ($package_status === 'draft') {
-                                echo "<a href='../library/cms_alt.php?package_id=" . urlencode($id) . "&remove_mpl_item_id=" . urlencode($item['id']) . "' onclick=\"return confirm('Remove this item from package?')\">Remove</a>";
+                                echo "<a href='../library/cms_alt.php?package_id=" . urlencode($id) . "&remove_order_item_id=" . urlencode($item['id']) . "' onclick=\"return confirm('Remove this item from package?')\">Remove</a>";
                             } else {
                                 echo "Locked";
                             }
@@ -144,10 +190,14 @@
                         <input type="hidden" name="package_ref_numb" value="<?php echo htmlspecialchars($package_ref); ?>">
                         <input type="hidden" name="package_ship_date" value="<?php echo htmlspecialchars($package_ship_date); ?>">
                         <input type="hidden" name="package_trailer" value="<?php echo htmlspecialchars($package_trailer); ?>">
+                        <input type="hidden" name="package_address" value="<?php echo htmlspecialchars($package_address); ?>">
+                        <input type="hidden" name="package_zip" value="<?php echo htmlspecialchars($package_zip); ?>">
+                        <input type="hidden" name="package_city" value="<?php echo htmlspecialchars($package_city); ?>">
+                        <input type="hidden" name="package_state" value="<?php echo htmlspecialchars($package_state); ?>">
                         <input type="hidden" name="package_status" value="<?php echo htmlspecialchars($package_status); ?>">
 
                         <div class="form-group">
-                            <label for="new_item_id">Internal Inventory Item</label>
+                            <label for="new_item_id">Warehouse Inventory Item</label>
                             <select name="new_item_id" required>
                                 <option value="" disabled selected>Select item to add</option>
                                 <?php
@@ -166,7 +216,7 @@
                         </div>
 
                         <div class="form-footer-actions">
-                            <button type="submit" name="add_mpl_item_btn" class="btn">Add Item</button>
+                            <button type="submit" name="add_order_item_btn" class="btn">Add Item</button>
                         </div>
                     </form>
                 </div>

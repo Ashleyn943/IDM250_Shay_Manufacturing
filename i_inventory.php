@@ -1,5 +1,7 @@
 <?php
 	require_once('db_connect.php');
+	require_once('session_config.php');
+    require_auth();
 
     $inventory_count = mysqli_num_rows(mysqli_query($connection, "SELECT inventory_id FROM inventory_item_info WHERE location = 'internal'"));
 ?>

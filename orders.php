@@ -5,6 +5,8 @@
     
     require_once('db_connect.php');
     require_once('library/cms.php');
+    require_once('session_config.php');
+    require_auth();
 ?>
 
 <!DOCTYPE html>
@@ -29,10 +31,20 @@
             </div>
         <?php } ?>
 
+        <?php if (isset($_GET['status']) && $_GET['status'] === 'success') { ?>
+            <div class="status-banner status-success">
+                Order saved. Selected items were added to the order list.
+            </div>
+        <?php } elseif (isset($_GET['status']) && $_GET['status'] === 'missing') { ?>
+            <div class="status-banner status-warning">
+                Please select at least one item and fill out all fields before submitting.
+            </div>
+        <?php } ?>
+
         <form method="POST" action="library/cms.php">
             <div class="form-group">
                 <label for="reference">Reference Number</label>
-                <input type="number" id="reference" name="reference" required>
+                <input type="number" id="reference" name="reference" maxlength="10" required>
             </div>
             <div class="form-group">
                 <label for="date">Expected Shipment Date</label>
@@ -57,7 +69,7 @@
             <div class="form-group">
                 <label for="state">State</label>
                 <select id="state" name="state" required>
-                    <option value="">Select a state</option>
+                    <option value="" disabled selected>Select a state</option>
                     <option value="AZ">Arizona</option>
                     <option value="AR">Arkansas</option>
                     <option value="CA">California</option>

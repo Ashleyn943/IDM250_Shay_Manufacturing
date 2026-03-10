@@ -1,7 +1,11 @@
 <?php
     require_once('db_connect.php');
+    require_once('session_config.php');
+    require_auth();
 
     $warehouse_count = mysqli_num_rows(mysqli_query($connection, "SELECT inventory_id FROM inventory_item_info WHERE location = 'warehouse'"));
+    $pending_MPLs = mysqli_num_rows(mysqli_query($connection, "SELECT id FROM mpl_shipping_list WHERE status = 'pending'"));
+    $pending_orders = mysqli_num_rows(mysqli_query($connection, "SELECT id FROM order_list WHERE status = 'pending'"));
 ?>
 
 <!DOCTYPE html>
@@ -26,12 +30,12 @@
                 <p class="stat-number"><?php echo $warehouse_count; ?></p>
             </div>
             <div class="card">
-                <h3>Pending Receipts</h3>
-                <p class="stat-number">--</p>
+                <h3>Pending MPLs</h3>
+                <p class="stat-number"><?php echo $pending_MPLs; ?></p>
             </div>
             <div class="card">
-                <h3>Pending Shipments</h3>
-                <p class="stat-number">--</p>
+                <h3>Pending Order Shipments</h3>
+                <p class="stat-number"><?php echo $pending_orders; ?></p>
             </div>
         </div>
 
@@ -47,8 +51,6 @@
                     <th>Unit</th>
                     <th>Footage</th>
                     <th>Warehouse</th>
-                    <th>Bin</th>
-                    <th>Status</th>
                 </tr>
                 <tr>
                    <?php
@@ -65,7 +67,6 @@
 							echo "<td>" . htmlspecialchars($row['quantity_unit'] ?? '') . "</td>";
 							echo "<td>" . htmlspecialchars($row['footage_quantity'] ?? '') . "</td>";
 							echo "<td>" . htmlspecialchars($row['location'] ?? '-') . "</td>";
-							echo "<td>" . htmlspecialchars($row['status'] ?? '-') . "</td>";
 							echo "</tr>";
 						}
 					} else {

@@ -105,20 +105,20 @@
         $reference = isset($_POST['reference']) ? intval($_POST['reference']) : 0;
         $date = isset($_POST['date']) ? $_POST['date'] : null;
         $trailer = isset($_POST['truck']) ? $_POST['truck'] : '';
+        $package_id = mt_rand(100000, 999999); // Generate a random package ID
 
         if (!empty($selected_items) && $reference && $date && $trailer) {
             $insert = $connection->prepare(
-                "INSERT INTO mpl_shipping_list (item_id, reference_numb, ship_date, trailer_name, status) VALUES (?, ?, ?, ?, 'draft')"
+                "INSERT INTO mpl_shipping_list (item_id, package_id, reference_numb, ship_date, trailer_name, status) VALUES (?, ?, ?, ?, ?, 'draft')"
             );
             foreach($selected_items as $shipID){
                 $item_id = intval($shipID);
-                $insert->bind_param("iiss", $item_id, $reference, $date, $trailer);
+                $insert->bind_param("iiiss", $item_id, $package_id, $reference, $date, $trailer);
                 $insert->execute();
 
-                $sql = $connection->prepare("UPDATE inventory_item_info SET `location`='on-route' WHERE inventory_id=$item_id");
+                $sql = $connection->prepare("UPDATE inventory_item_info SET `location`='pending' WHERE inventory_id=$item_id");
                 $sql->execute();
             };
-            mysqli_query($connection, $sql);
             header("Location: ../mpl.php?status=success");
             exit;
         } else {
@@ -126,6 +126,108 @@
             exit;
         }
     };
+
+    //send MPL item to other team (draft -> pending)
+    if (isset($_POST['send_mpl_btn'])) {
+        $mpl_id = intval($_POST['mpl_id'] ?? 0);
+
+        if ($mpl_id <= 0) {
+            header("Location: ../mpl_items.php?status=send-failed");
+            exit;
+        }
+
+        $package_stmt = $connection->prepare("SELECT reference_numb, ship_date, trailer_name FROM mpl_shipping_list WHERE id=? AND status='draft' LIMIT 1");
+        $package_stmt->bind_param("i", $mpl_id);
+        $package_stmt->execute();
+        $package_result = $package_stmt->get_result();
+        $package = $package_result ? $package_result->fetch_assoc() : null;
+
+        if (!$package) {
+            header("Location: ../mpl_items.php?status=send-failed");
+            exit;
+        }
+
+        $stmt = $connection->prepare("UPDATE mpl_shipping_list SET status='pending' WHERE reference_numb=? AND ship_date=? AND trailer_name=? AND status='draft'");
+        $stmt->bind_param("iss", $package['reference_numb'], $package['ship_date'], $package['trailer_name']);
+
+        if ($stmt->execute() && $stmt->affected_rows > 0) {
+            header("Location: ../mpl_items.php?status=sent");
+        } else {
+            header("Location: ../mpl_items.php?status=send-failed");
+        }
+        exit;
+    }
+
+    //send MPL item to other team via link (draft -> pending)
+    if (isset($_GET['send_mpl_id'])) {
+        $mpl_id = intval($_GET['send_mpl_id']);
+
+        if ($mpl_id <= 0) {
+            header("Location: ../mpl_items.php?status=send-failed");
+            exit;
+        }
+
+        $package_stmt = $connection->prepare("SELECT reference_numb, ship_date, trailer_name FROM mpl_shipping_list WHERE id=? AND status='draft' LIMIT 1");
+        $package_stmt->bind_param("i", $mpl_id);
+        $package_stmt->execute();
+        $package_result = $package_stmt->get_result();
+        $package = $package_result ? $package_result->fetch_assoc() : null;
+
+        if (!$package) {
+            header("Location: ../mpl_items.php?status=send-failed");
+            exit;
+        }
+
+        $stmt = $connection->prepare("UPDATE mpl_shipping_list SET status='pending' WHERE reference_numb=? AND ship_date=? AND trailer_name=? AND status='draft'");
+        $stmt->bind_param("iss", $package['reference_numb'], $package['ship_date'], $package['trailer_name']);
+
+        if ($stmt->execute() && $stmt->affected_rows > 0) {
+            header("Location: ../mpl_items.php?status=sent");
+        } else {
+            header("Location: ../mpl_items.php?status=send-failed");
+        }
+        exit;
+    }
+
+    //accept MPL item (pending -> accepted)
+    if (isset($_POST['accept_mpl_btn'])) {
+        $mpl_id = intval($_POST['mpl_id'] ?? 0);
+
+        if ($mpl_id <= 0) {
+            header("Location: ../mpl_items.php?status=accept-failed");
+            exit;
+        }
+
+        $stmt = $connection->prepare("UPDATE mpl_shipping_list SET status='accepted' WHERE id=? AND status='pending'");
+        $stmt->bind_param("i", $mpl_id);
+
+        if ($stmt->execute() && $stmt->affected_rows > 0) {
+            header("Location: ../mpl_items.php?status=accepted");
+        } else {
+            header("Location: ../mpl_items.php?status=accept-failed");
+        }
+        exit;
+    }
+
+    //accept MPL item via link (pending -> accepted)
+    if (isset($_GET['accept_mpl_id'])) {
+        $mpl_id = intval($_GET['accept_mpl_id']);
+
+        if ($mpl_id <= 0) {
+            header("Location: ../mpl_items.php?status=accept-failed");
+            exit;
+        }
+
+        $stmt = $connection->prepare("UPDATE mpl_shipping_list SET status='accepted' WHERE id=? AND status='pending'");
+        $stmt->bind_param("i", $mpl_id);
+
+        if ($stmt->execute() && $stmt->affected_rows > 0) {
+            header("Location: ../mpl_items.php?status=accepted");
+        } else {
+            header("Location: ../mpl_items.php?status=accept-failed");
+        }
+        exit;
+    }
 
     //update mpl item details
     if(isset($_POST['update_mpl_btn'])){
@@ -156,6 +258,7 @@
             $zip = isset($_POST['zip']) ? intval($_POST['zip']) : 0;
             $city = isset($_POST['city']) ? $_POST['city'] : '';
             $state = isset($_POST['state']) ? $_POST['state'] : '';
+            $package_id = mt_rand(100000, 999999); // Generate a random package ID
 
             if (!preg_match("/^[a-zA-Z0-9_]*$/", $trailer)) {
                 echo "Only alphabets, numbers, and underscores are allowed for Trailer Name";
@@ -163,8 +266,8 @@
                 echo "Only numbers are allowed for Reference Number";
             } else {
                 foreach($selected_items as $key => $shipID){
-                    $stmt = $connection->prepare('INSERT INTO order_list (item_id, reference_numb, ship_date, trailer_name, address, zip_code, city, state, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, "draft")');
-                    $stmt->bind_param("iisssiss", $shipID, $reference, $date, $trailer, $address, $zip, $city, $state);
+                    $stmt = $connection->prepare('INSERT INTO order_list (item_id, package_id, reference_numb, ship_date, trailer_name, address, zip_code, city, state, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, "draft")');
+                    $stmt->bind_param("iiisssiss", $shipID, $package_id, $reference, $date, $trailer, $address, $zip, $city, $state);
                     $stmt->execute();
 
                     $stmt= $connection->prepare("UPDATE inventory_item_info SET `location`='shipping' WHERE inventory_id=$shipID");
@@ -178,5 +281,193 @@
                 }
             };
         };
+    
+    //send order list to other team (draft -> pending)
+    if (isset($_POST['send_order_btn'])) {
+        $order_id = intval($_GET['id']);
+
+        if ($order_id <= 0) {
+            header("Location: ../order_items.php?status=send-failed");
+            exit;
+        }
+
+        $package_stmt = $connection->prepare("SELECT reference_numb, ship_date, trailer_name, address, zip_code, city, state FROM order_list WHERE package_id=? AND status='draft' LIMIT 1");
+        $package_stmt->bind_param("i", $$order_id);
+        $package_stmt->execute();
+        $package_result = $package_stmt->get_result();
+        $package = $package_result ? $package_result->fetch_assoc() : null;
+
+        if (!$package) {
+            header("Location: ../order_items.php?status=send-failed");
+            exit;
+        }
+
+        $stmt = $connection->prepare("UPDATE order_list SET status='pending' WHERE reference_numb=? AND ship_date=? AND trailer_name=? AND address=? AND zip_code=? AND city=? AND state=? AND status='draft'");
+        $stmt->bind_param("isssiss", $package['reference_numb'], $package['ship_date'], $package['trailer_name'], $package['address'], $package['zip_code'], $package['city'], $package['state']);
+
+        if ($stmt->execute() && $stmt->affected_rows > 0) {
+            header("Location: ../order_items.php?status=sent");
+        } else {
+            header("Location: ../order_items.php?status=send-failed");
+        }
+        exit;
+    }
+
+    //send order list to other team via link (draft -> pending)
+    if (isset($_GET['send_order_id'])) {
+        $order_id = intval($_GET['send_order_id']);
+
+        if ($order_id <= 0) {
+            header("Location: ../order_items.php?status=send-failed");
+            exit;
+        }
+
+        $package_stmt = $connection->prepare("SELECT reference_numb, ship_date, trailer_name, address, zip_code, city, state FROM order_list WHERE id=? AND status='draft' LIMIT 1");
+        $package_stmt->bind_param("i", $order_id);
+        $package_stmt->execute();
+        $package_result = $package_stmt->get_result();
+        $package = $package_result ? $package_result->fetch_assoc() : null;
+
+        if (!$package) {
+            header("Location: ../order_items.php?status=send-failed");
+            exit;
+        }
+
+        $stmt = $connection->prepare("UPDATE order_list SET status='pending' WHERE reference_numb=? AND ship_date=? AND trailer_name=? AND address=? AND zip_code=? AND city=? AND state=? AND status='draft'");
+        $stmt->bind_param("isssiss", $package['reference_numb'], $package['ship_date'], $package['trailer_name'], $package['address'], $package['zip_code'], $package['city'], $package['state']);
+
+        if ($stmt->execute() && $stmt->affected_rows > 0) {
+            header("Location: ../APIs/api_orders_send.php?order_id=$order_id");
+            header("Location: ../order_items.php?status=sent");
+        } else {
+            header("Location: ../order_items.php?status=send-failed");
+        }
+        exit;
+    }
+
+    //accept Order item (pending -> accepted)
+    if (isset($_POST['accept_order_btn'])) {
+        $order_id = intval($_POST['order_id'] ?? 0);
+
+        if ($order_id <= 0) {
+            header("Location: ../order_items.php?status=accept-failed");
+            exit;
+        }
+
+        $stmt = $connection->prepare("UPDATE order_list SET status='accepted' WHERE id=? AND status='pending'");
+        $stmt->bind_param("i", $order_id);
+
+        if ($stmt->execute() && $stmt->affected_rows > 0) {
+            header("Location: ../order_items.php?status=accepted");
+        } else {
+            header("Location: ../order_items.php?status=accept-failed");
+        }
+        exit;
+    }
+
+    //accept Order item via link (pending -> accepted)
+    if (isset($_GET['accept_order_id'])) {
+        $order_id = intval($_GET['accept_order_id']);
+
+        if ($order_id <= 0) {
+            header("Location: ../order_items.php?status=accept-failed");
+            exit;
+        }
+
+        $stmt = $connection->prepare("UPDATE order_list SET status='accepted' WHERE id=? AND status='pending'");
+        $stmt->bind_param("i", $order_id);
+
+        if ($stmt->execute() && $stmt->affected_rows > 0) {
+            header("Location: ../order_items.php?status=accepted");
+        } else {
+            header("Location: ../order_items.php?status=accept-failed");
+        }
+        exit;
+    }
+
+    //remove item from order package (draft only)
+    if (isset($_POST['remove_order_item_btn'])) {
+        $package_id = intval($_POST['package_id'] ?? 0);
+        $order_item_id = intval($_POST['order_item_id'] ?? 0);
+        $package_status = $_POST['package_status'] ?? '';
+
+        if ($package_id <= 0 || $order_item_id <= 0) {
+            header("Location: ../APIs/orders-update.php?id=$package_id&status=remove-failed");
+            exit;
+        }
+
+        if ($package_status !== 'draft') {
+            header("Location: ../APIs/orders-update.php?id=$package_id&status=locked");
+            exit;
+        }
+
+        $stmt = $connection->prepare("DELETE FROM order_list WHERE id=? AND status='draft'");
+        $stmt->bind_param("i", $order_item_id);
+
+        if ($stmt->execute() && $stmt->affected_rows > 0) {
+            header("Location: ../APIs/orders-update.php?id=$package_id&status=remove-success");
+            exit;
+        }
+
+        header("Location: ../APIs/orders-update.php?id=$package_id&status=remove-failed");
+        exit;
+    }
+
+    //remove item from order package via link (draft only)
+    if (isset($_GET['remove_order_item_id'])) {
+        $package_id = intval($_GET['package_id'] ?? 0);
+        $order_item_id = intval($_GET['remove_order_item_id'] ?? 0);
+
+        if ($package_id <= 0 || $order_item_id <= 0) {
+            header("Location: ../APIs/orders-update.php?id=$package_id&status=remove-failed");
+            exit;
+        }
+
+        $stmt = $connection->prepare("DELETE FROM order_list WHERE id=? AND status='draft'");
+        $stmt->bind_param("i", $order_item_id);
+
+        if ($stmt->execute() && $stmt->affected_rows > 0) {
+            header("Location: ../APIs/orders-update.php?id=$package_id&status=remove-success");
+            exit;
+        }
+
+        header("Location: ../APIs/orders-update.php?id=$package_id&status=remove-failed");
+        exit;
+    }
+
+    //update order package details
+    if(isset($_POST['update_order_btn'])){
+        $id = intval($_GET['id']);
+        $sql = $connection->prepare("SELECT package_id FROM order_list WHERE id=? LIMIT 1");
+        $sql->bind_param("i", $id);
+        $sql->execute();
+        $result = $sql->get_result();
+        if ($result && $result->num_rows > 0) {
+            $package = $result->fetch_assoc();
+            $package_id = $package['package_id'];
+        } else {
+            echo "Order package not found";
+            exit;
+        }
+        $reference = $_POST['ref_numb'];
+        $ship_date = $_POST['ship_date'];
+        $trailer = $_POST['truck'];
+        $address = $_POST['address'];
+        $zip = $_POST['zip'];
+        $city = $_POST['city'];
+        $state = $_POST['state'];
+        
+       
+        $stmt = $connection->prepare("UPDATE order_list SET reference_numb=?, ship_date=?, trailer_name=?, address=?, zip_code=?, city=?, state=? WHERE package_id=$package_id");
+        $stmt->bind_param("isssiss", $reference, $ship_date, $trailer, $address, $zip, $city, $state);
+        
+        
+        if($stmt->execute()){
+            echo "Order details updated successfully";
+            header("Location: ../order_items.php");
+        } else {
+            echo "Failed to update order details";
+        }
+    };
     
 

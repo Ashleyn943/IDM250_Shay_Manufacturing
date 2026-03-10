@@ -1,5 +1,7 @@
 <?php
     require_once('db_connect.php');
+    require_once('session_config.php');
+    require_auth();
 ?>
 
 <!DOCTYPE html>
@@ -16,30 +18,25 @@
 </head>
 <body>
     <?php include('header.php'); ?>
+    <?php if (isset($_GET['status']) && in_array($_GET['status'], ['product-added', 'product-updated', 'product-deleted', 'failed'])) { ?>
+        <div class="dashboard-container">
+            <div class="status-banner status-success">
+                <?php
+                    if ($_GET['status'] === 'product-added') {
+                        echo 'Product added successfully.';
+                    } elseif ($_GET['status'] === 'product-updated') {
+                        echo 'Product updated successfully.';
+                    } elseif ($_GET['status'] === 'product-deleted') {
+                        echo 'Product deleted successfully.';
+                    } elseif ($_GET['status'] === 'failed') {
+                        echo 'An error occurred. Please try again.';
+                    }
+                ?>
+            </div>
+        </div>
+    <?php } ?>
     <div class="Products">
         <h1>Products</h1>
-            <?php if (isset($_GET['status']) && $_GET['status'] === 'success_new') { ?>
-                <div class="status-banner status-success">
-                    New product added successfully.
-                </div>
-            <?php } ?>
-            <?php if (isset($_GET['status']) && $_GET['status'] === 'success_update') { ?>
-                <div class="status-banner status-success">
-                    Product updated successfully.
-                </div>
-            <?php } ?>
-            <?php if (isset($_GET['status']) && $_GET['status'] === 'success_delete') { ?>
-                <div class="status-banner status-success">
-                    Product deleted successfully.
-                </div>
-            <?php } ?>
-            <?php if (isset($_GET['status']) && $_GET['status'] === 'failed') { ?>
-                <div class="status-banner status-error">
-                    Failed action. Please try again.
-                </div>
-            <?php } ?>
-            
-
         <a href="APIs/product-new.php" class="btn">Add New Product</a>
     </div>
     <div class="table-container">
