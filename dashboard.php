@@ -1,5 +1,7 @@
 <?php
     require_once('db_connect.php');
+    require_once('session_config.php');
+    require_auth();
 
     // Fetch counts for the summary cards
     $sku_count = mysqli_num_rows(mysqli_query($connection, "SELECT id FROM products"));

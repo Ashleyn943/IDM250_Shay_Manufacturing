@@ -1,6 +1,8 @@
 <?php
     require_once('db_connect.php');
     require_once('library/cms.php');
+    require_once('session_config.php');
+    require_auth();
 ?>
 
 <!DOCTYPE html>
@@ -15,8 +17,9 @@
     <title>Shipping List</title>
 </head>
 <body>
-       <?php include('header.php'); ?>
+    <?php include('header.php'); ?>
     <div class="dashboard-container">
+    <h1>Select Stock to be Shipped</h1>
     <?php if (isset($_GET['status']) && $_GET['status'] === 'success') { ?>
         <div class="status-banner status-success">
             Shipping list saved. Selected items were added to the MPL shipping list.
@@ -28,7 +31,7 @@
     <?php } ?>
 
     <div class="form-section">
-        <h1>Select Stock to be Shipped</h1>
+        
         <form method="POST" action="library/cms.php">
             <div class="form-group">
                 <label for="reference">Reference Number</label>

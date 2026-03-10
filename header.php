@@ -8,7 +8,9 @@
         <li><a href="i_inventory.php"> Internal Inventory</a></li>
         <li><a href="w_inventory.php"> Warehouse Inventory</a></li>
         <li><a href="mpl.php">MPL Page</a></li>
-        <li><a href="mpl_items.php">MPL Items</a></li>
+        <li><a href="mpl_items.php">MPL List</a></li>
         <li><a href="orders.php">Orders</a></li>
+        <li><a href="order_items.php">Orders List</a></li>
+        <li><a href="logout.php">Logout</a></li>
     </ul>
 </nav>

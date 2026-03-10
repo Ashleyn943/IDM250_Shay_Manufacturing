@@ -1,7 +1,69 @@
 <?php
     require_once('db_connect.php');
-    // require_once('library/auth.php');
     require_once('library/cms.php');
+    require_once('session_config.php');
+    require_auth();
+
+    $sql = "SELECT
+                ordership.id,
+                ordership.item_id,
+                ordership.reference_numb,
+                ordership.ship_date,
+                ordership.trailer_name,
+                ordership.address,
+                ordership.zip_code,
+                ordership.city,
+                ordership.state,
+                ordership.status,
+                iii.sku,
+                iii.unit_numb,
+                iii.ficha,
+                iii.description1,
+                iii.description2,
+                iii.quantity,
+                iii.quantity_unit,
+                iii.footage_quantity,
+                pt.uom_primary
+            FROM order_list ordership
+            INNER JOIN inventory_item_info iii ON ordership.item_id = iii.inventory_id
+            INNER JOIN products_types pt ON iii.ficha = pt.ficha
+            WHERE iii.location = 'shipping'
+            ORDER BY ordership.ship_date DESC, ordership.id DESC
+            ";
+
+    $result = mysqli_query($connection, $sql);
+
+    $order_package = [];
+    if ($result && mysqli_num_rows($result) > 0) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $package_key = implode('|', [
+                $row['reference_numb'],
+                $row['ship_date'],
+                $row['trailer_name'],
+                $row['address'],
+                $row['zip_code'],
+                $row['city'],
+                $row['state'],
+                $row['status']
+            ]);
+
+            if (!isset($order_package[$package_key])) {
+                $order_package[$package_key] = [
+                    'reference_numb' => $row['reference_numb'],
+                    'ship_date' => $row['ship_date'],
+                    'trailer_name' => $row['trailer_name'],
+                    'address' => $row['address'],
+                    'zip_code' => $row['zip_code'],
+                    'city' => $row['city'],
+                    'state' => $row['state'],
+                    'status' => $row['status'],
+                    'items' => []
+                ];
+            }
+
+            $order_package[$package_key]['items'][] = $row;
+        }
+    }
 ?>
 
 <!DOCTYPE html>
@@ -10,56 +72,141 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/stylesheet.css">
+    <link rel="stylesheet" href="css/nav.css">
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="icon" href="media/ShayIcon.png" type="image/x-icon">
     <title>Order List</title>
 </head>
 <body>
-    <a href="mpl.php">Return to Create Master Packing List</a> | <a href="order.php">Create Order List</a> 
-        <h1>Items on Order List</h1>
-        <form method="POST">
-        <table class="inventory_tb">
-            <tr>
-                <th>SKU</th>
-                <th>Unit Number</th>
-                <th>Ficha</th>
-                <th>Description 1</th>
-                <th>Description 2</th>
-                <th>Quantity</th>
-                <th>Quantity Unit</th>
-                <th>Footage Quantity</th>
-                <th>UOM</th>
-                <th>Reference Number</th>
-                <th>Ship Date</th>
-                <th>Trailer Name</th>   
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-            <?php
-                $stmt = $connection->prepare("SELECT iii.*, ordership.*, pt.uom_primary FROM inventory_item_info iii INNER JOIN order_list ordership ON iii.inventory_id = ordership.item_id INNER JOIN products_types pt ON iii.ficha = pt.ficha");
-                $stmt->execute();
-                $result = $stmt->get_result();
-                    if($result->num_rows > 0){
-                        foreach($result as $row){
-                            $stmt->execute();
-                            echo "<tr>";
-                            echo "<td>" . htmlspecialchars($row['sku'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['unit_numb'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['ficha'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['description1'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['description2'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['quantity'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['quantity_unit'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['footage_quantity'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['uom_primary'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['reference_numb'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['ship_date'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['trailer_name'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['status'] ?? '') . "</td>";
-                            echo "<td> <a onClick='return confirm(\"Are you sure you want to remove this item from the Order List?\")' href='APIs/orders-delete.php?id=" . htmlspecialchars($row['id'] ?? 0) . "' name='delete-order'>Remove</a></td>";
-                            echo "</tr>";
-                        }   
+    <?php include('header.php'); ?>
+    <div class="dashboard-container">
+        <h1>Order List Items</h1>
+
+        <?php if (isset($_GET['status']) && $_GET['status'] === 'deleted') { ?>
+            <div class="status-banner status-success">
+                Order item deleted successfully.
+            </div>
+        <?php } elseif (isset($_GET['status']) && $_GET['status'] === 'sent') { ?>
+            <div class="status-banner status-success">
+                Order item(s) sent to other team. Status is now pending.
+            </div>
+        <?php } elseif (isset($_GET['status']) && $_GET['status'] === 'accepted') { ?>
+            <div class="status-banner status-success">
+                Order item(s) accepted. Status is now accepted.
+            </div>
+        <?php } elseif (isset($_GET['status']) && $_GET['status'] === 'send-failed') { ?>
+            <div class="status-banner status-warning">
+                Unable to send item. It may no longer be in draft status.
+            </div>
+        <?php } elseif (isset($_GET['status']) && $_GET['status'] === 'accept-failed') { ?>
+            <div class="status-banner status-warning">
+                Unable to accept item. It may no longer be in pending status.
+            </div>
+        <?php } ?>
+
+        <div class="section-container">
+            <h2>Actions</h2>
+            <div class="button-group">
+                <a href="order.php" class="btn">Create New Order</a>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <h2>All Order List Records</h2>
+            <form method="POST">
+                <table class="data_tb">
+                    <tr>
+                        <th>Reference Number</th>
+                        <th>Ship Date</th>
+                        <th>Trailer Name</th>
+                        <th>Address</th>
+                        <th>Zip Code</th>
+                        <th>City</th>
+                        <th>State</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                    <?php
+                        if (!empty($order_package)) {
+                            $package_index = 0;
+                            foreach ($order_package as $package) {
+                                $detail_row_id = 'package-details-' . $package_index;
+                                $package_first_item_id = $package['items'][0]['id'];
+
+                                echo "<tr onclick=\"togglePackageDetails('" . $detail_row_id . "')\" style='cursor:pointer;'>";
+                                echo "<td>" . htmlspecialchars($package['reference_numb']) . "</td>";
+                                echo "<td>" . htmlspecialchars($package['ship_date']) . "</td>";
+                                echo "<td>" . htmlspecialchars($package['trailer_name']) . "</td>";
+                                echo "<td>" . htmlspecialchars($package['address']) . "</td>";
+                                echo "<td>" . htmlspecialchars($package['zip_code']) . "</td>";
+                                echo "<td>" . htmlspecialchars($package['city']) . "</td>";
+                                echo "<td>" . htmlspecialchars($package['state']) . "</td>";
+                                echo "<td>" . htmlspecialchars($package['status']) . "</td>";
+                                echo "<td>";
+                                echo "<a href='APIs/orders-update.php?id=" . urlencode($package_first_item_id) . "' onclick=\"event.stopPropagation();\">Edit</a>";
+                                if (($package['status'] ?? '') === 'draft') {
+                                    echo " | <a href='library/cms.php?send_order_id=" . urlencode($package_first_item_id) . "' onclick=\"event.stopPropagation(); return confirm('Send this package to the other team?');\">Send</a>";
+                                }
+                                echo "</td>";
+                                echo "</tr>";
+
+                                echo "<tr id='" . $detail_row_id . "' style='display:none;'>";
+                                echo "<td colspan='9'>";
+                                echo "<table class='data_tb' style='margin-top:10px;'>";
+                                echo "<tr>";
+                                echo "<th>Unit #</th>";
+                                echo "<th>Ficha</th>";
+                                echo "<th>Description</th>";
+                                echo "<th>Quantity</th>";
+                                echo "<th>Qty Unit</th>";
+                                echo "<th>Footage</th>";
+                                echo "<th>Actions</th>";
+                                echo "</tr>";
+
+                                foreach ($package['items'] as $item) {
+                                    $description = trim(($item['description1'] ?? '') . ' ' . ($item['description2'] ?? ''));
+
+                                    echo "<tr>";
+                                    echo "<td>" . htmlspecialchars($item['unit_numb']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($item['ficha']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($description) . "</td>";
+                                    echo "<td>" . htmlspecialchars($item['quantity']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($item['quantity_unit']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($item['footage_quantity']) . "</td>";
+                                    echo "<td>";
+                                    echo "<a href='APIs/orders-delete.php?id=" . urlencode($item['id']) . "' onclick=\"return confirm('Delete this order item?')\">Delete</a>";
+
+                                    if (($item['status'] ?? '') === 'pending') {
+                                        echo " | <a href='library/cms.php?accept_order_id=" . urlencode($item['id']) . "' onclick=\"return confirm('Mark this order item as accepted?')\">Accept</a>";
+                                    }
+
+                                    echo "</td>";
+                                    echo "</tr>";
+                                }
+
+                                echo "</table>";
+                                echo "</td>";
+                                echo "</tr>";
+
+                                $package_index++;
+                            }
+                    } else {
+                        echo "<tr><td colspan='9'>No MPL shipping records found.</td></tr>";
                     }
-            ?>
-        </table>
-    </form>
+                    ?>
+                </table>
+            </form>
+        </div>
+    </div>
+    <script>
+        function togglePackageDetails(rowId) {
+            const row = document.getElementById(rowId);
+            if (!row) {
+                return;
+            }
+
+            row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+        }
+    </script>
 </body>
 </html>

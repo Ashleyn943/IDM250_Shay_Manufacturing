@@ -1,7 +1,11 @@
 <?php
 	require_once('db_connect.php');
+	require_once('session_config.php');
+    require_auth();
 
     $inventory_count = mysqli_num_rows(mysqli_query($connection, "SELECT inventory_id FROM inventory_item_info WHERE location = 'internal'"));
+	$pending_MPLs = mysqli_num_rows(mysqli_query($connection, "SELECT id FROM mpl_shipping_list WHERE status = 'pending'"));
+    $pending_orders = mysqli_num_rows(mysqli_query($connection, "SELECT id FROM order_list WHERE status = 'pending'"));
 ?>
 
 <!DOCTYPE html>
@@ -26,23 +30,15 @@
 				<p class="stat-number"><?php echo $inventory_count; ?></p>
 			</div>
 			<div class="card">
-				<h3>Low Stock</h3>
-				<p class="stat-number">--</p>
+				<h3>Pending MPLs</h3>
+				<p class="stat-number"><?php echo $pending_MPLs; ?></p>
 			</div>
 			<div class="card">
-				<h3>Locations</h3>
-				<p class="stat-number">--</p>
+				<h3>Pending Orders</h3>
+				<p class="stat-number"><?php echo $pending_orders; ?></p>
 			</div>
 		</div>
 
-		<div class="section-container">
-			<h2>Quick Actions</h2>
-			<div class="button-group">
-				<a href="#" class="btn">Adjust Quantity</a>
-				<a href="#" class="btn">Move Item</a>
-				<a href="#" class="btn">Add Note</a>
-			</div>
-		</div>
 
 		<div class="table-container">
 			<h2>Inventory Items</h2>

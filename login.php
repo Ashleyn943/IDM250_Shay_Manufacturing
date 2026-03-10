@@ -52,7 +52,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Handle login POST request
 header('Content-Type: application/json');
 
 $username = trim($_POST['username'] ?? '');
@@ -64,9 +63,7 @@ if (empty($username) || empty($password)) {
     exit();
 }
 
-// Check against static credentials
 if ($username === STATIC_USERNAME && $password === STATIC_PASSWORD) {
-    // Create session
     session_regenerate_id(true);
     $_SESSION['user_id'] = 1;
     $_SESSION['username'] = $username;

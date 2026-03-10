@@ -1,11 +1,12 @@
 <?php
-    //header('Content-Type: application/json');
-    //header('Access-Control-Allow-Origin: *');
     require_once('db_connect.php');
+    require_once('session_config.php');
+    require_auth();
 
     // Fetch counts for the summary cards
     $sku_count = mysqli_num_rows(mysqli_query($connection, "SELECT id FROM products"));
-    $inventory_count = mysqli_num_rows(mysqli_query($connection, "SELECT inventory_id FROM inventory_item_info"));
+    $inventory_count = mysqli_num_rows(mysqli_query($connection, "SELECT inventory_id FROM inventory_item_info WHERE location = 'internal'"));
+    $warehouse_count = mysqli_num_rows(mysqli_query($connection, "SELECT inventory_id FROM inventory_item_info WHERE location = 'warehouse'"));
 ?>
 
 <!DOCTYPE html>
@@ -35,7 +36,7 @@
         </div>
         <div class="card">
             <h3>Warehouse Inventory</h3>
-            <p class="stat-number">0</p>
+            <p class="stat-number"><?php echo $warehouse_count; ?></p>
         </div>
     </div>
 

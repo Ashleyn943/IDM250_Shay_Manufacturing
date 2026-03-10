@@ -38,7 +38,11 @@
                     </div>
                     <div class="form-group">
                         <label for="uom_primary">Unit of Measure</label>
-                        <input type="text" name="uom_primary" placeholder="PALLET / BUNDLE" required>
+                        <select name="uom_primary" required>
+                            <option value="" disabled selected>Select unit</option>
+                            <option value="PALLET">Pallet</option>
+                            <option value="BUNDLE">Bundle</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="piece_count">Piece Count</label>
@@ -62,8 +66,11 @@
                     </div>
                     <div class="form-group">
                         <label for="assembly">Assembly</label>
-                        <input type="text" name="assembly" placeholder="TRUE / FALSE" required>
-                    </div> 
+                        <select name="assembly" required>
+                            <option value="" disabled selected>Select unit</option>
+                            <option value="TRUE">TRUE</option>
+                            <option value="FALSE">FALSE</option>
+                        </select>                    </div> 
                     <div class="form-group">
                         <label for="rate">Price Rate</label>
                         <input type="number" name="rate" step="0.01" required>
