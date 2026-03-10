@@ -29,6 +29,7 @@
             Please select at least one item and fill out all fields before submitting.
         </div>
     <?php } ?>
+
     <div class="form-section">
         
         <form method="POST" action="library/cms.php">
@@ -60,12 +61,12 @@
                 <th>Location</th>
             </tr>
             <?php
-                $result = mysqli_query($connection, "SELECT * FROM inventory_item_info WHERE location = 'internal'");
-                    if($row = mysqli_num_rows($result)){
-                        foreach($result as $row){
+				$result = mysqli_query($connection, "SELECT * FROM inventory_item_info WHERE location = 'internal'");
+                    if ($result && mysqli_num_rows($result) > 0) {
+                        while ($row = mysqli_fetch_assoc($result)) {
                             echo "<tr>";
-                            echo "<td> <input type='checkbox' value='" . htmlspecialchars($row['inventory_id']) . "' name='selected_items[" . htmlspecialchars($row['inventory_id']) . "]'> </td>";
-                            echo "<td>" . htmlspecialchars($row['inventory_id'] ?? '') . "</td>";
+                            echo "<td><input type='checkbox' value='" . htmlspecialchars($row['inventory_id']) . "' name='selected_items[" . htmlspecialchars($row['inventory_id']) . "]'></td>";
+                            echo "<td>" . htmlspecialchars($row['sku'] ?? '') . "</td>";
                             echo "<td>" . htmlspecialchars($row['unit_numb'] ?? '') . "</td>";
                             echo "<td>" . htmlspecialchars($row['ficha'] ?? '') . "</td>";
                             $description = trim(($row['description1'] ?? '') . ' ' . ($row['description2'] ?? ''));
@@ -75,7 +76,9 @@
                             echo "<td>" . htmlspecialchars($row['footage_quantity'] ?? '') . "</td>";
                             echo "<td>" . htmlspecialchars($row['location'] ?? '') . "</td>";
                             echo "</tr>";
-                        }   
+                        }
+                    } else {
+                        echo "<tr><td colspan='10'>No inventory items found.</td></tr>";
                     }
             ?>
                 </table>

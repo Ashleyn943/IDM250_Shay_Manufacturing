@@ -113,9 +113,8 @@
                     <option value="WI">Wisconsin</option>
                     <option value="WY">Wyoming</option>
                 </select>
-            </div>
+          </div>
 
-    
             <div class="form-actions">
                  <button type="submit" name="order_list" class="btn-form">Submit Order</button>
             </div>
