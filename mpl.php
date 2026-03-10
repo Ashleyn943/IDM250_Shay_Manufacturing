@@ -53,8 +53,7 @@
                 <th>SKU</th>
                 <th>Unit Number</th>
                 <th>Ficha</th>
-                <th>Description 1</th>
-                <th>Description 2</th>
+                <th>Description</th>
                 <th>Quantity</th>
                 <th>Quantity Unit</th>
                 <th>Footage Quantity</th>
@@ -69,8 +68,8 @@
                             echo "<td>" . htmlspecialchars($row['inventory_id'] ?? '') . "</td>";
                             echo "<td>" . htmlspecialchars($row['unit_numb'] ?? '') . "</td>";
                             echo "<td>" . htmlspecialchars($row['ficha'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['description1'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['description2'] ?? '') . "</td>";
+                            $description = trim(($row['description1'] ?? '') . ' ' . ($row['description2'] ?? ''));
+                            echo "<td>" . htmlspecialchars($description) . "</td>";
                             echo "<td>" . htmlspecialchars($row['quantity'] ?? '') . "</td>";
                             echo "<td>" . htmlspecialchars($row['quantity_unit'] ?? '') . "</td>";
                             echo "<td>" . htmlspecialchars($row['footage_quantity'] ?? '') . "</td>";
