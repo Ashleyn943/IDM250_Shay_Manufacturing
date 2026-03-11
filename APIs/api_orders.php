@@ -38,7 +38,7 @@
         $update_id = isset($input['id']) ? intval($input['id']) : 0;
         $requested_status = strtolower(trim($input['status'] ?? ''));
 
-        if ($update_id > 0 && in_array($requested_status, ['pending', 'accepted'])) {
+        if ($update_id > 0 && in_array($requested_status, ['pending', 'shipped'])) {
             $ref_stmt = $connection->prepare("SELECT reference_numb FROM order_list WHERE id = ?");
             $ref_stmt->bind_param("i", $update_id);
             $ref_stmt->execute();

@@ -60,7 +60,7 @@
                 <label for="city">City</label>
                 <input type="text" id="city" name="city" required>
             </div>
-            <div class="form-group">
+            <div class="form-group dropdown-select">
                 <label for="state">State</label>
                 <select id="state" name="state" required>
                     <option value="" disabled selected>Select a state</option>
@@ -115,9 +115,9 @@
                 </select>
           </div>
 
-            <div class="form-actions">
-                 <button type="submit" name="order_list" class="btn-form">Submit Order</button>
-            </div>
+        <div class="form-actions">
+                <button type="submit" name="order_list" class="btn-form">Submit Order</button>
+        </div>
     </div>
 
     <div class="table-container">

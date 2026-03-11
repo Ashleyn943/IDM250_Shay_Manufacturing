@@ -318,7 +318,7 @@
     //add item to MPL package (draft only)
     if (isset($_POST['add_mpl_item_btn'])) {
         $package_id = intval($_POST['package_id'] ?? 0);
-        $new_item_id = intval($_POST['new_item_id'] ?? 0);
+        $new_item_id = isset($_POST['new_item_id']) ? $_POST['new_item_id'] : 0;
         $reference = intval($_POST['package_ref_numb'] ?? 0);
         $ship_date = $_POST['package_ship_date'] ?? '';
         $trailer = $_POST['package_trailer'] ?? '';
@@ -334,18 +334,23 @@
             exit;
         }
 
-        $check_stmt = $connection->prepare("SELECT id FROM mpl_shipping_list WHERE item_id=? AND reference_numb=? AND ship_date=? AND trailer_name=? LIMIT 1");
-        $check_stmt->bind_param("iiss", $new_item_id, $reference, $ship_date, $trailer);
-        $check_stmt->execute();
-        $check_result = $check_stmt->get_result();
+        foreach ($new_item_id as $item_id) {
+             // Check for duplicate item in the same package
+            $check_stmt = $connection->prepare("SELECT id FROM mpl_shipping_list WHERE item_id=? AND reference_numb=? AND ship_date=? AND trailer_name=? LIMIT 1");
+            $check_stmt->bind_param("iiss", $item_id, $reference, $ship_date, $trailer);
+            $check_stmt->execute();
+            $check_result = $check_stmt->get_result();
+        }
 
         if ($check_result && $check_result->num_rows > 0) {
             header("Location: ../APIs/mpl-update.php?id=$package_id&status=add-duplicate");
             exit;
         }
 
-        $insert_stmt = $connection->prepare("INSERT INTO mpl_shipping_list (item_id, reference_numb, ship_date, trailer_name, status) VALUES (?, ?, ?, ?, 'draft')");
-        $insert_stmt->bind_param("iiss", $new_item_id, $reference, $ship_date, $trailer);
+        foreach ($new_item_id as $item_id) {
+            $insert_stmt = $connection->prepare("INSERT INTO mpl_shipping_list (item_id, reference_numb, ship_date, trailer_name, status) VALUES (?, ?, ?, ?, 'draft')");
+            $insert_stmt->bind_param("iiss", $item_id, $reference, $ship_date, $trailer);
+        }
 
         if ($insert_stmt->execute()) {
             header("Location: ../APIs/mpl-update.php?id=$package_id&status=add-success");
@@ -594,7 +599,7 @@
     //add item to order package (draft only)
     if (isset($_POST['add_order_item_btn'])) {
         $package_id = intval($_POST['package_id'] ?? 0);
-        $new_item_id = intval($_POST['new_item_id'] ?? 0);
+        $new_item_id = isset($_POST['new_item_id']) ? $_POST['new_item_id'] : 0;
         $reference = intval($_POST['package_ref_numb'] ?? 0);
         $ship_date = $_POST['package_ship_date'] ?? '';
         $trailer = $_POST['package_trailer'] ?? '';
@@ -624,17 +629,21 @@
             exit;
         }
 
-        $insert_stmt = $connection->prepare("INSERT INTO order_list (item_id, reference_numb, ship_date, trailer_name, address, zip_code, city, state, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'draft')");
-        $insert_stmt->bind_param("iisssiss", $new_item_id, $reference, $ship_date, $trailer, $address, $zip, $city, $state);
+        foreach ($new_item_id as $item_id) {
+            $insert_stmt = $connection->prepare("INSERT INTO order_list (item_id, reference_numb, ship_date, trailer_name, address, zip_code, city, state, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'draft')");
+            $insert_stmt->bind_param("iisssiss", $item_id, $reference, $ship_date, $trailer, $address, $zip, $city, $state);
+        }
 
         if ($insert_stmt->execute()) {
             header("Location: ../APIs/orders-update.php?id=$package_id&status=add-success");
             exit;
         }
 
-        $stmt= $connection->prepare("UPDATE inventory_item_info SET `location`='shipping' WHERE inventory_id=?");
-        $stmt->bind_param("i", $new_item_id);
-        $stmt->execute();
+        foreach ($new_item_id as $item_id) {
+            $stmt= $connection->prepare("UPDATE inventory_item_info SET `location`='shipping' WHERE inventory_id=?");
+            $stmt->bind_param("i", $new_item_id);
+            $stmt->execute();
+        }
 
         header("Location: ../APIs/orders-update.php?id=$package_id&status=add-failed");
         exit;

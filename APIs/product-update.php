@@ -45,9 +45,13 @@
                         <label for="description">Description:</label>
                         <input type="text" name="description" value="<?php echo htmlspecialchars($row['description']) ?? ''; ?>" required>
                     </div>
-                    <div class="form-group">
-                        <label for="uom_primary">Unit of Measure:</label>
-                        <input type="text" name="uom_primary" value="<?php echo htmlspecialchars($row['uom_primary']) ?? ''; ?>" required>
+                    <div class="form-group dropdown-select">
+                        <label for="uom_primary">Unit of Measure</label>
+                        <select name="uom_primary" required>
+                            <option value="" disabled selected>Select unit</option>
+                            <option value="PALLET">Pallet</option>
+                            <option value="BUNDLE">Bundle</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="piece_count">Piece Count:</label>
@@ -69,10 +73,14 @@
                         <label for="weight_lbs">Weight (lbs):</label>
                         <input type="number" name="weight_lbs" step="0.01" value="<?php echo htmlspecialchars($row['weight_lbs']) ?? ''; ?>" required>
                     </div>
-                    <div class="form-group">
-                        <label for="assembly">Assembly:</label>
-                        <input type="text" name="assembly" value="<?php echo htmlspecialchars($row['assembly']) ?? ''; ?>" required>
-                    </div> 
+                    <div class="form-group dropdown-select">
+                        <label for="assembly">Assembly</label>
+                        <select name="assembly" required>
+                            <option value="" disabled selected>Select unit</option>
+                            <option value="TRUE">TRUE</option>
+                            <option value="FALSE">FALSE</option>
+                        </select>                    
+                    </div>  
                     <div class="form-group">
                         <label for="rate">Price Rate:</label>
                         <input type="number" name="rate" step="0.01" value="<?php echo htmlspecialchars($row['rate']) ?? ''; ?>" required>

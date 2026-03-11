@@ -148,7 +148,7 @@
 
                         <div class="form-group">
                             <label for="new_item_id">Internal Inventory Item</label>
-                            <select name="new_item_id" required>
+                            <select name="new_item_id[]" required>
                                 <option value="" disabled selected>Select item to add</option>
                                 <?php
                                     if ($available_items_result && $available_items_result->num_rows > 0) {
