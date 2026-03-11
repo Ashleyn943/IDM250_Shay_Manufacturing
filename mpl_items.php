@@ -116,8 +116,8 @@
                             echo "<td>" . htmlspecialchars($package['trailer_name']) . "</td>";
                             echo "<td>" . htmlspecialchars($package['status']) . "</td>";
                             echo "<td>";
-                            echo "<a href='APIs/mpl-update.php?id=" . urlencode($package_first_item_id) . "' onclick=\"event.stopPropagation();\">Edit</a>";
                             if (($package['status'] ?? '') === 'draft') {
+                                echo "<a href='APIs/mpl-update.php?id=" . urlencode($package_first_item_id) . "' onclick=\"event.stopPropagation();\">Edit</a>";
                                 echo " | <a href='library/cms.php?send_mpl_id=" . urlencode($package_first_item_id) . "' onclick=\"event.stopPropagation(); return confirm('Send this package to the other team?');\">Send</a>";
                             }
                             echo "</td>";
@@ -147,7 +147,9 @@
                                 echo "<td>" . htmlspecialchars($item['quantity_unit']) . "</td>";
                                 echo "<td>" . htmlspecialchars($item['footage_quantity']) . "</td>";
                                 echo "<td>";
-                                echo "<a href='APIs/mpl-delete.php?id=" . urlencode($item['id']) . "' onclick=\"return confirm('Delete this MPL item?')\">Delete</a>";
+                                if (($package['status'] ?? '') !== 'accepted') {
+                                    echo "<a href='APIs/mpl-delete.php?id=" . urlencode($item['id']) . "' onclick=\"return confirm('Delete this MPL item?')\">Delete</a>";
+                                }
 
                                 if (($item['status'] ?? '') === 'pending') {
                                     echo " | <a href='library/cms.php?accept_mpl_id=" . urlencode($item['id']) . "' onclick=\"return confirm('Mark this MPL item as accepted?')\">Accept</a>";

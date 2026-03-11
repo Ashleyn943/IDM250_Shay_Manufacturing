@@ -38,14 +38,64 @@
         $update_id = isset($input['id']) ? intval($input['id']) : 0;
         $requested_status = strtolower(trim($input['status'] ?? ''));
 
-        if ($update_id > 0 && in_array($requested_status, ['pending', 'accepted'])) {
-            $stmt = $connection->prepare("UPDATE mpl_shipping_list SET status=? WHERE id=?");
-            $stmt->bind_param("si", $requested_status, $update_id);
+        if ($update_id > 0 && in_array($requested_status, ['pending', 'shipped'])) {
+            $ref_stmt = $connection->prepare("SELECT reference_numb FROM order_list WHERE id = ?");
+            $ref_stmt->bind_param("i", $update_id);
+            $ref_stmt->execute();
+            $ref_result = $ref_stmt->get_result();
+            $ref_result = $ref_result->fetch_assoc();
+            $ref_stmt->close();
+            
+            if ($ref_result) {
+                $reference_numb = $ref_result['reference_numb'];
+                $stmt = $connection->prepare("UPDATE order_list SET status=? WHERE reference_numb=?");
+                $stmt->bind_param("si", $requested_status, $reference_numb);
+                if ($stmt->execute()) {
+                    $stmt->close();
+
+                    $items_stmt = $connection->prepare("SELECT item_id FROM order_list WHERE reference_numb=?");
+                    $items_stmt->bind_param("i", $reference_numb);
+                    $items_stmt->execute();
+                    $items_result = $items_stmt->get_result();
+                    $items_stmt->close();
+
+                    $item_ids = [];
+                        while ($row = $items_result->fetch_assoc()) {
+                            $item_ids[] = intval($row['item_id']);
+                        }
+
+                        if (count($item_ids) > 0) {
+                            $placeholders = implode(',', array_fill(0, count($item_ids), '?'));
+                            $types = str_repeat('i', count($item_ids));
+                            $inv_stmt = $connection->prepare("
+                                UPDATE inventory_item_info SET location='shipping' WHERE inventory_id IN ($placeholders)
+                            ");
+                            $inv_stmt->bind_param($types, ...$item_ids);
+                            $inv_stmt->execute();
+                            $inv_stmt->close();
+                        }
+
+                        echo json_encode([
+                            'success' => true,
+                            'message' => 'Order status updated and inventory locations set to shipping',
+                            'id' => $update_id,
+                            'status' => $requested_status
+                        ]);
+                        exit;
+                }
+
+                    http_response_code(500);
+                    echo json_encode(['success' => false, 'error' => 'Failed to update status: ' . $stmt->error]);
+                    exit;
+            } else {
+                $stmt = $connection->prepare("UPDATE order_list SET status=? WHERE id=?");
+                $stmt->bind_param("si", $requested_status, $update_id);
+            }
 
             if ($stmt->execute()) {
                 echo json_encode([
                     'success' => true,
-                    'message' => 'MPL status updated',
+                    'message' => 'Order status updated',
                     'id' => $update_id,
                     'status' => $requested_status
                 ]);
@@ -148,92 +198,6 @@
             echo json_encode(['success' => false, 'error' => 'Server error: ' . $e->getMessage()]);
             exit;
         }
-
-
-
-
-
-    //     $input = json_decode(file_get_contents('php://input'), true);
-
-    //     if (!isset($input['reference']) || !isset($input['date']) || !isset($input['truck'])) {
-    //         http_response_code(400);
-    //         echo json_encode(['error' => 'Invalid Input, Missing required fields']);
-    //         exit;
-    //     } else {
-    //         $reference = htmlspecialchars($input['reference']);
-    //         $date = htmlspecialchars($input['date']);
-    //         $trailer = htmlspecialchars($input['truck']);
-    //     };
-
-    //         $sql = "SELECT item_id FROM order_list WHERE status='pending'";
-    //         $result = mysqli_query($connection, $sql);
-    //         $selected_items = [];
-    //         while($row = mysqli_fetch_assoc($result)) {
-    //             $selected_items[] = $row['item_id'];
-    //         }
-    // try {
-    //     foreach($selected_items as $shipID){
-    //         //personal database
-    //         $stmt = $connection->prepare('INSERT INTO order_list (item_id, reference_numb, ship_date, trailer_name, status) VALUES (?, ?, ?, ?, "pending")');
-    //         $stmt->bind_param("iiss", 
-    //             $shipID, 
-    //             $reference, 
-    //             $date, 
-    //             $trailer);
-
-    //         if (!$stmt->execute()) {
-    //             http_response_code(500);
-    //             echo json_encode(['sql error' => $stmt->error]);
-    //             exit;
-    //         };
-    //         $stmt->close();
-
-    //         //warehouse database
-    //         $stmt = $connection->prepare("SELECT iii.*, pt.uom_primary FROM inventory_item_info iii INNER JOIN products_types pt ON iii.ficha = pt.ficha WHERE iii.inventory_id = ?");
-    //         $stmt->bind_param("i", $shipID);
-    //         $stmt->execute();
-    //         $row = $stmt->get_result()->fetch_assoc();
-    //         $stmt->close();
-
-    //         if (!$row) {
-    //             http_response_code(404);
-    //             echo json_encode(['error' => 'Item not found']);
-    //             exit;
-    //         }
-            
-    //         $stmt = $connection->prepare("INSERT INTO orders (item_id, reference_numb, ship_date, trailer_name, ficha, unit_number, uom_primary) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    //         $stmt->bind_param("iisssss",
-    //          $shipID, 
-    //         $reference, 
-    //             $date, 
-    //             $trailer, 
-    //             $row['ficha'], 
-    //             $row['unit_numb'], 
-    //             $row['uom_primary']
-    //         );
-
-    //         if (!$stmt->execute()) {
-    //             http_response_code(500);
-    //             echo json_encode(['sql error' => $stmt->error]);
-    //             exit;
-    //         };
-    //         $stmt->close();
-
-    //         //update location in personal database
-    //         $stmt= $connection->prepare("UPDATE inventory_item_info SET `location`='shipping' WHERE inventory_id=?");
-    //         $stmt->bind_param("i", $shipID);
-
-    //         if (!$stmt->execute()) {
-    //             http_response_code(500);
-    //             echo json_encode(['sql error' => $stmt->error]);
-    //             exit;
-    //         };
-    //         $stmt->close();
-    //     }
-    // } catch (Exception $e) {
-    // http_response_code(500);
-    // echo json_encode(['error' => $e->getMessage()]);
-    // exit;}
         
         $data = [
             'reference' => $reference, 

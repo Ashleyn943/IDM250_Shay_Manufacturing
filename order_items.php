@@ -143,7 +143,9 @@
                                 echo "<td>" . htmlspecialchars($package['state']) . "</td>";
                                 echo "<td>" . htmlspecialchars($package['status']) . "</td>";
                                 echo "<td>";
-                                echo "<a href='APIs/orders-update.php?id=" . urlencode($package_first_item_id) . "' onclick=\"event.stopPropagation();\">Edit</a>";
+                                if (($package['status'] ?? '') === 'draft') {
+                                    echo "<a href='APIs/orders-update.php?id=" . urlencode($package_first_item_id) . "' onclick=\"event.stopPropagation();\">Edit</a>";
+                                }
                                 if (($package['status'] ?? '') === 'draft') {
                                     echo " | <a href='library/cms.php?send_order_id=" . urlencode($package_first_item_id) . "' onclick=\"event.stopPropagation(); return confirm('Send this package to the other team?');\">Send</a>";
                                 }

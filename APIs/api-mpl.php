@@ -60,8 +60,59 @@
         $requested_status = strtolower(trim($input['status'] ?? ''));
 
         if ($update_id > 0 && in_array($requested_status, ['pending', 'accepted'])) {
-            $stmt = $connection->prepare("UPDATE mpl_shipping_list SET status=? WHERE id=?");
-            $stmt->bind_param("si", $requested_status, $update_id);
+            $ref_stmt = $connection->prepare("SELECT reference_numb FROM mpl_shipping_list WHERE id = ?");
+            $ref_stmt->bind_param("i", $update_id);
+            $ref_stmt->execute();
+            $ref_result = $ref_stmt->get_result();
+            $ref_result = $ref_result->fetch_assoc();
+            $ref_stmt->close();
+            
+            if ($ref_result) {
+                $reference_numb = $ref_result['reference_numb'];
+                $stmt = $connection->prepare("UPDATE mpl_shipping_list SET status=? WHERE reference_numb=?");
+                $stmt->bind_param("si", $requested_status, $reference_numb);
+
+                if ($stmt->execute()) {
+                    $stmt->close();
+
+                    $items_stmt = $connection->prepare("SELECT item_id FROM mpl_shipping_list WHERE reference_numb=?");
+                    $items_stmt->bind_param("i", $reference_numb);
+                    $items_stmt->execute();
+                    $items_result = $items_stmt->get_result();
+                    $items_stmt->close();
+
+                    $item_ids = [];
+                        while ($row = $items_result->fetch_assoc()) {
+                            $item_ids[] = intval($row['item_id']);
+                        }
+
+                        if (count($item_ids) > 0) {
+                            $placeholders = implode(',', array_fill(0, count($item_ids), '?'));
+                            $types = str_repeat('i', count($item_ids));
+                            $inv_stmt = $connection->prepare("
+                                UPDATE inventory_item_info SET location='warehouse' WHERE inventory_id IN ($placeholders)
+                            ");
+                            $inv_stmt->bind_param($types, ...$item_ids);
+                            $inv_stmt->execute();
+                            $inv_stmt->close();
+                        }
+
+                        echo json_encode([
+                            'success' => true,
+                            'message' => 'MPL status updated and inventory locations set to warehouse',
+                            'id' => $update_id,
+                            'status' => $requested_status
+                        ]);
+                        exit;
+                }
+
+                    http_response_code(500);
+                    echo json_encode(['success' => false, 'error' => 'Failed to update status: ' . $stmt->error]);
+                    exit;
+            } else {
+                $stmt = $connection->prepare("UPDATE mpl_shipping_list SET status=? WHERE id=?");
+                $stmt->bind_param("si", $requested_status, $update_id);
+            }
 
             if ($stmt->execute()) {
                 echo json_encode([

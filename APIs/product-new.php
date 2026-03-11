@@ -36,7 +36,7 @@
                         <label for="description">Description</label>
                         <input type="text" name="description" placeholder="Material description..." required>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group dropdown-select">
                         <label for="uom_primary">Unit of Measure</label>
                         <select name="uom_primary" required>
                             <option value="" disabled selected>Select unit</option>
@@ -64,13 +64,14 @@
                         <label for="weight_lbs">Weight (lbs)</label>
                         <input type="number" name="weight_lbs" step="0.01" required>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group dropdown-select">
                         <label for="assembly">Assembly</label>
                         <select name="assembly" required>
                             <option value="" disabled selected>Select unit</option>
                             <option value="TRUE">TRUE</option>
                             <option value="FALSE">FALSE</option>
-                        </select>                    </div> 
+                        </select>                    
+                    </div> 
                     <div class="form-group">
                         <label for="rate">Price Rate</label>
                         <input type="number" name="rate" step="0.01" required>
