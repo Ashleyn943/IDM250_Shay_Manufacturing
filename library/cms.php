@@ -487,7 +487,7 @@
         $stmt->bind_param("isssiss", $package['reference_numb'], $package['ship_date'], $package['trailer_name'], $package['address'], $package['zip_code'], $package['city'], $package['state']);
 
         if ($stmt->execute() && $stmt->affected_rows > 0) {
-            header("Location: ../APIs/api_orders_send.php?order_id=$order_id");
+            header("Location: ../APIs/api_orders.php?order_id=$order_id");
             header("Location: ../order_items.php?status=sent");
         } else {
             header("Location: ../order_items.php?status=send-failed");

@@ -128,7 +128,7 @@
         }
 
         try {
-            $stmt = $connection->prepare("INSERT INTO orders_list (item_id, reference_numb, ship_date, trailer_name, address, zip_code, city, state, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt = $connection->prepare("INSERT INTO order_list (item_id, reference_numb, ship_date, trailer_name, address, zip_code, city, state, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
             if (!$stmt) {
                 http_response_code(500);
@@ -187,39 +187,39 @@
                 exit;
             }
 
+            $data = [
+                'reference' => $reference, 
+                'date' => $date, 
+                'trailer' => $trailer, 
+                'selected_items' => $selected_items
+            ];
+
+            $options = [
+                'http' =>  [
+                    'method' => $method,
+                    'header' => 'X-API-KEY:' . $api_key . "\r\n" .
+                        'Content-Type: application/json',
+                        'content' => json_encode($data)
+                ]
+            ];
+            
+            $context  = stream_context_create($options);
+            $response = @file_get_contents($url, false, $context);
+            $result   = json_decode($response, true);
+
             echo json_encode([
                 'success' => true,
                 'message' => 'Shipping record(s) created',
                 'count' => count($created_ids),
                 'ids' => $created_ids
             ]);
+            exit;
+
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode(['success' => false, 'error' => 'Server error: ' . $e->getMessage()]);
             exit;
         }
-        
-        $data = [
-            'reference' => $reference, 
-            'date' => $date, 
-            'trailer' => $trailer, 
-            'selected_items' => $selected_items
-        ];
-
-        $options = [
-            'http' =>  [
-                'method' => $method,
-                'header' => 'X-API-KEY:' . $api_key . "\r\n" .
-                    'Content-Type: application/json',
-                    'content' => json_encode($data)
-            ]
-        ];
-        
-        $context  = stream_context_create($options);
-        $response = @file_get_contents($url, false, $context);
-        $result   = json_decode($response, true);
-
-        echo json_encode(['success' => true, 'data' => $data]);
 
     } else {
         http_response_code(405);
