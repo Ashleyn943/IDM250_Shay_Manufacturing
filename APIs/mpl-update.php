@@ -147,31 +147,43 @@
                         <input type="hidden" name="package_status" value="<?php echo htmlspecialchars($package_status); ?>">
 
                         <div class="form-group">
-                            <label for="new_item_id">Internal Inventory Item</label>
-                            <select name="new_item_id" required>
-                                <option value="" disabled selected>Select item to add</option>
-                                <?php
-                                    if ($available_items_result && $available_items_result->num_rows > 0) {
+                            <label>Internal Inventory Items</label>
+                            <?php if ($available_items_result && $available_items_result->num_rows > 0) { ?>
+                                <div class="mpl-select-all-wrap">
+                                    <label class="mpl-select-all-label">
+                                        <input type="checkbox" id="select-all-items">
+                                        Select all available items
+                                    </label>
+                                </div>
+                                <div class="mpl-item-list">
+                                    <?php
                                         while ($available_item = $available_items_result->fetch_assoc()) {
                                             $available_description = trim(($available_item['description1'] ?? '') . ' ' . ($available_item['description2'] ?? ''));
-                                            echo "<option value='" . htmlspecialchars($available_item['inventory_id']) . "'>" .
-                                                htmlspecialchars($available_item['inventory_id']) . " | Unit " .
-                                                htmlspecialchars($available_item['unit_numb']) . " | " .
-                                                htmlspecialchars($available_description) .
-                                            "</option>";
-                                        }
-                                    }
-                                ?>
-                            </select>
+                                    ?>
+                                        <label class="mpl-item-option">
+                                            <input type="checkbox" class="mpl-item-checkbox" name="new_item_id[]" value="<?php echo htmlspecialchars($available_item['inventory_id']); ?>">
+                                            <?php
+                                                echo htmlspecialchars($available_item['inventory_id']) . " | Unit " .
+                                                     htmlspecialchars($available_item['unit_numb']) . " | " .
+                                                     htmlspecialchars($available_description);
+                                            ?>
+                                        </label>
+                                    <?php } ?>
+                                </div>
+                                <small class="mpl-item-help">Choose one or more items to add to this MPL package.</small>
+                            <?php } else { ?>
+                                <div class="empty-msg">No available internal items to add.</div>
+                            <?php } ?>
                         </div>
 
                         <div class="form-footer-actions">
-                            <button type="submit" name="add_mpl_item_btn" class="btn">Add Item</button>
+                            <button type="submit" name="add_mpl_item_btn" class="btn">Add Selected Items</button>
                         </div>
                     </form>
                 </div>
             <?php } ?>
         </div>
     </div>
+    <script src="../js/mpl-update.js"></script>
 </body>
 </html>

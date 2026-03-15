@@ -161,13 +161,21 @@
     //add item to MPL package (draft only)
     if (isset($_POST['add_mpl_item_btn'])) {
         $package_id = intval($_POST['package_id'] ?? 0);
-        $new_item_id = intval($_POST['new_item_id'] ?? 0);
+        $new_item_id = $_POST['new_item_id'] ?? [];
         $reference = intval($_POST['package_ref_numb'] ?? 0);
         $ship_date = $_POST['package_ship_date'] ?? '';
         $trailer = $_POST['package_trailer'] ?? '';
         $package_status = $_POST['package_status'] ?? '';
 
-        if ($package_id <= 0 || $new_item_id <= 0 || $reference <= 0 || $ship_date === '' || $trailer === '') {
+        if (!is_array($new_item_id)) {
+            $new_item_id = [$new_item_id];
+        }
+
+        $new_item_id = array_values(array_unique(array_filter(array_map('intval', $new_item_id), function ($value) {
+            return $value > 0;
+        })));
+
+        if ($package_id <= 0 || empty($new_item_id) || $reference <= 0 || $ship_date === '' || $trailer === '') {
             header("Location: ../APIs/mpl-update.php?id=$package_id&status=add-failed");
             exit;
         }
@@ -178,20 +186,35 @@
         }
 
         $check_stmt = $connection->prepare("SELECT id FROM mpl_shipping_list WHERE item_id=? AND reference_numb=? AND ship_date=? AND trailer_name=? LIMIT 1");
-        $check_stmt->bind_param("iiss", $new_item_id, $reference, $ship_date, $trailer);
-        $check_stmt->execute();
-        $check_result = $check_stmt->get_result();
+        $insert_stmt = $connection->prepare("INSERT INTO mpl_shipping_list (item_id, reference_numb, ship_date, trailer_name, status) VALUES (?, ?, ?, ?, 'draft')");
 
-        if ($check_result && $check_result->num_rows > 0) {
-            header("Location: ../APIs/mpl-update.php?id=$package_id&status=add-duplicate");
+        $inserted_count = 0;
+        $duplicate_count = 0;
+
+        foreach ($new_item_id as $item_id) {
+            // Check for duplicate item in the same package
+            $check_stmt->bind_param("iiss", $item_id, $reference, $ship_date, $trailer);
+            $check_stmt->execute();
+            $check_result = $check_stmt->get_result();
+
+            if ($check_result && $check_result->num_rows > 0) {
+                $duplicate_count++;
+                continue;
+            }
+
+            $insert_stmt->bind_param("iiss", $item_id, $reference, $ship_date, $trailer);
+            if ($insert_stmt->execute()) {
+                $inserted_count++;
+            }
+        }
+
+        if ($inserted_count > 0) {
+            header("Location: ../APIs/mpl-update.php?id=$package_id&status=add-success");
             exit;
         }
 
-        $insert_stmt = $connection->prepare("INSERT INTO mpl_shipping_list (item_id, reference_numb, ship_date, trailer_name, status) VALUES (?, ?, ?, ?, 'draft')");
-        $insert_stmt->bind_param("iiss", $new_item_id, $reference, $ship_date, $trailer);
-
-        if ($insert_stmt->execute()) {
-            header("Location: ../APIs/mpl-update.php?id=$package_id&status=add-success");
+        if ($duplicate_count > 0) {
+            header("Location: ../APIs/mpl-update.php?id=$package_id&status=add-duplicate");
             exit;
         }
 
