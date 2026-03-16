@@ -84,7 +84,13 @@
             <div class="status-banner status-warning">
                 Unable to accept item. It may no longer be in pending status.
             </div>
+        <?php } elseif (isset($_GET['status']) && $_GET['status'] === 'updated') { ?>
+            <div class="status-banner status-success">
+                MPL item updated successfully.
+            </div>
         <?php } ?>
+
+        <br>
 
         <div class="section-container">
             <h2>Quick Actions</h2>

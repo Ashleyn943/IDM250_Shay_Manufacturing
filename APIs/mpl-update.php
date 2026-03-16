@@ -2,7 +2,7 @@
     require_once('../db_connect.php');
     //require_once('../library/auth.php');
     require_once('../library/cms_alt.php');
-
+    
     $id = intval($_GET['id'] ?? 0);
 
     $package_stmt = $connection->prepare("SELECT id, reference_numb, ship_date, trailer_name, status FROM mpl_shipping_list WHERE id=? LIMIT 1");
@@ -22,7 +22,24 @@
     $package_trailer = $package_row['trailer_name'];
     $package_status = $package_row['status'];
 
-    $items_stmt = $connection->prepare("SELECT mplship.id, mplship.item_id, iii.unit_numb, iii.ficha, iii.description1, iii.description2, iii.quantity, iii.quantity_unit, iii.footage_quantity FROM mpl_shipping_list mplship INNER JOIN inventory_item_info iii ON mplship.item_id = iii.inventory_id WHERE mplship.reference_numb=? AND mplship.ship_date=? AND mplship.trailer_name=? AND mplship.status=? ORDER BY mplship.id ASC");
+    $items_stmt = $connection->prepare("SELECT 
+                                        mplship.id, 
+                                        mplship.item_id, 
+                                        iii.unit_numb, 
+                                        iii.ficha, 
+                                        iii.description1, 
+                                        iii.description2, 
+                                        iii.quantity, 
+                                        iii.quantity_unit, 
+                                        iii.footage_quantity 
+                                        FROM mpl_shipping_list mplship 
+                                        INNER JOIN inventory_item_info iii 
+                                        ON mplship.item_id = iii.inventory_id 
+                                        WHERE mplship.reference_numb=? 
+                                        AND mplship.ship_date=? 
+                                        AND mplship.trailer_name=? 
+                                        AND mplship.status=? 
+                                        ORDER BY mplship.id ASC");
     $items_stmt->bind_param("isss", $package_ref, $package_ship_date, $package_trailer, $package_status);
     $items_stmt->execute();
     $items_result = $items_stmt->get_result();
@@ -31,7 +48,17 @@
         $package_items[] = $item;
     }
 
-    $available_items_stmt = $connection->prepare("SELECT iii.inventory_id, iii.unit_numb, iii.ficha, iii.description1, iii.description2 FROM inventory_item_info iii WHERE iii.location='internal' AND iii.inventory_id NOT IN (SELECT item_id FROM mpl_shipping_list WHERE reference_numb=? AND ship_date=? AND trailer_name=?) ORDER BY iii.inventory_id ASC");
+    $available_items_stmt = $connection->prepare("SELECT 
+                                                    iii.inventory_id, 
+                                                    iii.unit_numb, 
+                                                    iii.ficha, 
+                                                    iii.description1, 
+                                                    iii.description2 
+                                                    FROM inventory_item_info iii 
+                                                    WHERE iii.location='internal' 
+                                                    AND iii.inventory_id 
+                                                    NOT IN (SELECT item_id FROM mpl_shipping_list WHERE reference_numb=? AND ship_date=? AND trailer_name=?) 
+                                                    ORDER BY iii.inventory_id ASC");
     $available_items_stmt->bind_param("iss", $package_ref, $package_ship_date, $package_trailer);
     $available_items_stmt->execute();
     $available_items_result = $available_items_stmt->get_result();
@@ -68,6 +95,8 @@
             <?php } elseif (isset($_GET['status']) && $_GET['status'] === 'locked') { ?>
                 <div class="status-banner status-warning">This package is no longer in draft status and cannot be edited.</div>
             <?php } ?>
+
+            <br>
 
             <form action="../library/cms_alt.php?id=<?php echo $id; ?>" method="POST" class="styled-form">
                 <input type="hidden" name="package_id" value="<?php echo htmlspecialchars($id); ?>">
@@ -148,21 +177,32 @@
 
                         <div class="form-group">
                             <label for="new_item_id">Internal Inventory Item</label>
-                            <select name="new_item_id[]" required>
-                                <option value="" disabled selected>Select item to add</option>
-                                <?php
-                                    if ($available_items_result && $available_items_result->num_rows > 0) {
+                            <?php if ($available_items_result && $available_items_result->num_rows > 0) { ?>
+                                <div class="select-all-wrap">
+                                    <label class="select-all-label">
+                                        <input type="checkbox" id="select-all-items">
+                                        Select all available items
+                                    </label>
+                                </div>
+                                <div class="item-list">
+                                    <?php
                                         while ($available_item = $available_items_result->fetch_assoc()) {
                                             $available_description = trim(($available_item['description1'] ?? '') . ' ' . ($available_item['description2'] ?? ''));
-                                            echo "<option value='" . htmlspecialchars($available_item['inventory_id']) . "'>" .
-                                                htmlspecialchars($available_item['inventory_id']) . " | Unit " .
-                                                htmlspecialchars($available_item['unit_numb']) . " | " .
-                                                htmlspecialchars($available_description) .
-                                            "</option>";
-                                        }
-                                    }
-                                ?>
-                            </select>
+                                    ?>
+                                        <label class="item-option">
+                                            <input type="checkbox" class="item-checkbox" name="new_item_id[]" value="<?php echo htmlspecialchars($available_item['inventory_id']); ?>">
+                                            <?php
+                                                echo htmlspecialchars($available_item['inventory_id']) . " | Unit " .
+                                                     htmlspecialchars($available_item['unit_numb']) . " | " .
+                                                     htmlspecialchars($available_description);
+                                            ?>
+                                        </label>
+                                    <?php } ?>
+                                </div>
+                                <small class="item-help">Choose one or more items to add to this MPL package.</small>
+                            <?php } else { ?>
+                                <div class="empty-msg">No available internal items to add.</div>
+                            <?php } ?>
                         </div>
 
                         <div class="form-footer-actions">
@@ -173,5 +213,6 @@
             <?php } ?>
         </div>
     </div>
+    <script src="../js/package-update.js"></script>
 </body>
 </html>
