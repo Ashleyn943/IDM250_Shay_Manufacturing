@@ -176,8 +176,9 @@
                                     echo "<td>" . htmlspecialchars($item['quantity_unit']) . "</td>";
                                     echo "<td>" . htmlspecialchars($item['footage_quantity']) . "</td>";
                                     echo "<td>";
-                                    echo "<a href='APIs/orders-delete.php?id=" . urlencode($item['id']) . "' onclick=\"return confirm('Delete this order item?')\">Delete</a>";
-
+                                    if (($package['status'] ?? '') === 'draft') {
+                                        echo "<a href='APIs/orders-delete.php?id=" . urlencode($item['id']) . "' onclick=\"return confirm('Delete this order item?')\">Delete</a>";
+                                    }
                                     if (($item['status'] ?? '') === 'pending') {
                                         echo " | <a href='library/cms.php?accept_order_id=" . urlencode($item['id']) . "' onclick=\"return confirm('Mark this order item as accepted?')\">Accept</a>";
                                     }

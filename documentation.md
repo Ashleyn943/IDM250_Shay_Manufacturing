@@ -12,6 +12,7 @@ Because both are used in production workflows, this document covers both.
 ### Environment Source
 - Environment values are loaded from .env.php
 - Database connection is created in db_connect.php
+- .env.php is not committed in this repository and must exist locally
 
 ### API Key Authentication
 - API key check function: library/auth.php
@@ -19,11 +20,8 @@ Because both are used in production workflows, this document covers both.
 - Expected value source: .env.php key X-API-KEY
 
 ### Current Default Values (local/dev)
-- DB_HOST: localhost
-- DB_NAME: idm250
-- DB_USER: root
-- DB_PASS: root
-- X-API-KEY: test
+- These values are examples only. Actual values come from local .env.php.
+- If .env.php is missing, DB constants default to empty strings in db_connect.php.
 
 ## 3) Data Model and Status Lifecycle
 
@@ -31,6 +29,7 @@ Because both are used in production workflows, this document covers both.
 - inventory_item_info
 - mpl_shipping_list
 - order_list
+- orders_list
 - products
 - products_dimensions
 - products_types
@@ -39,10 +38,12 @@ Because both are used in production workflows, this document covers both.
 - draft
 - pending
 - accepted
+- shipped
 
 ### Typical Lifecycle
 - MPL flow: draft -> pending -> accepted
-- Order flow: draft -> pending -> accepted
+- Order API flow: pending -> shipped (status update path in APIs/api_orders.php)
+- Order UI/action flow: draft -> pending -> accepted (library handlers)
 
 ## 4) JSON API Endpoints (APIs folder)
 
@@ -83,7 +84,7 @@ Purpose:
 - JSON endpoint intended for order integration with external team
 
 Auth:
-- check_api_key is called
+- check_api_key is called, but this file currently references $env without initializing it
 
 Methods:
 - GET
@@ -91,6 +92,7 @@ Methods:
   - Filter: only ol.status = pending
 - POST
   - Mode A: if id and status are present, performs status update path
+    - Allowed statuses in this file: pending, shipped
   - Mode B: create order shipping rows from payload
 
 Expected Fields for Create Path:
@@ -106,6 +108,9 @@ Expected Fields for Create Path:
 Important Behavior Notes:
 - This file currently contains mixed logic and legacy code blocks.
 - It also constructs an outbound HTTP call near the end of POST handling.
+- Table naming is inconsistent in this file:
+  - Reads/updates use order_list
+  - Inserts use orders_list
 
 ## 4.3 APIs/mpl-shipping.php
 Purpose:
@@ -238,6 +243,7 @@ Body fields:
 
 Expected:
 - success true and created ids when insert path succeeds
+- Insert path targets orders_list, while status updates target order_list in current code
 
 ## 8) Recommended Consumer Rules
 - Always send X-API-KEY for JSON API calls.
@@ -245,6 +251,7 @@ Expected:
 - Expect inconsistent response envelopes across endpoints.
 - Confirm target endpoint behavior in this document before integrating.
 - Treat library/cms.php and library/cms_alt.php as state transition endpoints for status workflow.
+- Validate order status values per endpoint before calling (API uses shipped; UI/library flows include accepted).
 
 ## 9) File Index Covered By This Document
 - APIs/api-mpl.php

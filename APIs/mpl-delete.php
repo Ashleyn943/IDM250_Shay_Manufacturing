@@ -13,7 +13,7 @@
 
          if($stmt->execute()){
              echo "Item deleted successfully";
-             header("Location: ../mpl_items.php");
+             header("Location: ../mpl_items.php?status=deleted");
          } else {
              echo "Failed to delete item";
          }

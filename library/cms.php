@@ -270,52 +270,6 @@
         }
     }
 
-    //add item to MPL package (draft only)
-    if (isset($_POST['add_mpl_item_btn'])) {
-        $package_id = intval($_POST['package_id'] ?? 0);
-        $new_item_id = isset($_POST['new_item_id']) ? $_POST['new_item_id'] : 0;
-        $reference = intval($_POST['package_ref_numb'] ?? 0);
-        $ship_date = $_POST['package_ship_date'] ?? '';
-        $trailer = $_POST['package_trailer'] ?? '';
-        $package_status = $_POST['package_status'] ?? '';
-
-        if ($package_id <= 0 || $new_item_id <= 0 || $reference <= 0 || $ship_date === '' || $trailer === '') {
-            header("Location: ../APIs/mpl-update.php?id=$package_id&status=add-failed");
-            exit;
-        }
-
-        if ($package_status !== 'draft') {
-            header("Location: ../APIs/mpl-update.php?id=$package_id&status=locked");
-            exit;
-        }
-
-        foreach ($new_item_id as $item_id) {
-             // Check for duplicate item in the same package
-            $check_stmt = $connection->prepare("SELECT id FROM mpl_shipping_list WHERE item_id=? AND reference_numb=? AND ship_date=? AND trailer_name=? LIMIT 1");
-            $check_stmt->bind_param("iiss", $item_id, $reference, $ship_date, $trailer);
-            $check_stmt->execute();
-            $check_result = $check_stmt->get_result();
-        }
-
-        if ($check_result && $check_result->num_rows > 0) {
-            header("Location: ../APIs/mpl-update.php?id=$package_id&status=add-duplicate");
-            exit;
-        }
-
-        foreach ($new_item_id as $item_id) {
-            $insert_stmt = $connection->prepare("INSERT INTO mpl_shipping_list (item_id, reference_numb, ship_date, trailer_name, status) VALUES (?, ?, ?, ?, 'draft')");
-            $insert_stmt->bind_param("iiss", $item_id, $reference, $ship_date, $trailer);
-        }
-
-        if ($insert_stmt->execute()) {
-            header("Location: ../APIs/mpl-update.php?id=$package_id&status=add-success");
-            exit;
-        }
-
-        header("Location: ../APIs/mpl-update.php?id=$package_id&status=add-failed");
-        exit;
-    }
-
     //remove item from MPL package (draft only)
     if (isset($_POST['remove_mpl_item_btn'])) {
         $package_id = intval($_POST['package_id'] ?? 0);
@@ -429,7 +383,7 @@
         }
 
         $package_stmt = $connection->prepare("SELECT reference_numb, ship_date, trailer_name, address, zip_code, city, state FROM order_list WHERE package_id=? AND status='draft' LIMIT 1");
-        $package_stmt->bind_param("i", $$order_id);
+        $package_stmt->bind_param("i", $order_id);
         $package_stmt->execute();
         $package_result = $package_stmt->get_result();
         $package = $package_result ? $package_result->fetch_assoc() : null;
@@ -487,7 +441,7 @@
         $stmt->bind_param("isssiss", $package['reference_numb'], $package['ship_date'], $package['trailer_name'], $package['address'], $package['zip_code'], $package['city'], $package['state']);
 
         if ($stmt->execute() && $stmt->affected_rows > 0) {
-            header("Location: ../APIs/api_orders_send.php?order_id=$order_id");
+            header("Location: ../APIs/api_orders.php?order_id=$order_id");
             header("Location: ../order_items.php?status=sent");
         } else {
             header("Location: ../order_items.php?status=send-failed");
@@ -569,56 +523,6 @@
         }
     }
 
-    //remove item from order package (draft only)
-    if (isset($_POST['remove_order_item_btn'])) {
-        $package_id = intval($_POST['package_id'] ?? 0);
-        $order_item_id = intval($_POST['order_item_id'] ?? 0);
-        $package_status = $_POST['package_status'] ?? '';
-
-        if ($package_id <= 0 || $order_item_id <= 0) {
-            header("Location: ../APIs/orders-update.php?id=$package_id&status=remove-failed");
-            exit;
-        }
-
-        if ($package_status !== 'draft') {
-            header("Location: ../APIs/orders-update.php?id=$package_id&status=locked");
-            exit;
-        }
-
-        $stmt = $connection->prepare("DELETE FROM order_list WHERE id=? AND status='draft'");
-        $stmt->bind_param("i", $order_item_id);
-
-        if ($stmt->execute() && $stmt->affected_rows > 0) {
-            header("Location: ../APIs/orders-update.php?id=$package_id&status=remove-success");
-            exit;
-        }
-
-        header("Location: ../APIs/orders-update.php?id=$package_id&status=remove-failed");
-        exit;
-    }
-
-    //remove item from order package via link (draft only)
-    if (isset($_GET['remove_order_item_id'])) {
-        $package_id = intval($_GET['package_id'] ?? 0);
-        $order_item_id = intval($_GET['remove_order_item_id'] ?? 0);
-
-        if ($package_id <= 0 || $order_item_id <= 0) {
-            header("Location: ../APIs/orders-update.php?id=$package_id&status=remove-failed");
-            exit;
-        }
-
-        $stmt = $connection->prepare("DELETE FROM order_list WHERE id=? AND status='draft'");
-        $stmt->bind_param("i", $order_item_id);
-
-        if ($stmt->execute() && $stmt->affected_rows > 0) {
-            header("Location: ../APIs/orders-update.php?id=$package_id&status=remove-success");
-            exit;
-        }
-
-        header("Location: ../APIs/orders-update.php?id=$package_id&status=remove-failed");
-        exit;
-    }
-
     //update order package details
     if(isset($_POST['update_order_btn'])){
         $id = intval($_GET['id']);
@@ -657,17 +561,38 @@
     //add item to order package (draft only)
     if (isset($_POST['add_order_item_btn'])) {
         $package_id = intval($_POST['package_id'] ?? 0);
-        $new_item_id = isset($_POST['new_item_id']) ? $_POST['new_item_id'] : 0;
+            $sql = $connection->prepare("SELECT package_id FROM order_list WHERE id=? LIMIT 1");
+            $sql->bind_param("i", $package_id);
+            $sql->execute();
+            $result = $sql->get_result();
+            if ($result && $result->num_rows > 0) {
+                $package = $result->fetch_assoc();
+                $internal_package_id = $package['package_id'];
+            } else {
+                echo "Order package not found <br>";
+                var_dump($id);
+                die();
+            } 
+        $new_item_id = $_POST['new_item_id'] ?? [];
         $reference = intval($_POST['package_ref_numb'] ?? 0);
-        $ship_date = $_POST['package_ship_date'] ?? '';
-        $trailer = $_POST['package_trailer'] ?? '';
+        $ship_date = htmlspecialchars($_POST['package_ship_date'] ?? '');
+        $trailer = htmlspecialchars($_POST['package_trailer'] ?? '');
         $address = htmlspecialchars($_POST['package_address'] ?? '');
         $zip = intval($_POST['package_zip'] ?? 0);
         $city = htmlspecialchars($_POST['package_city'] ?? '');
         $state = htmlspecialchars($_POST['package_state'] ?? '');
         $package_status = htmlspecialchars($_POST['package_status'] ?? '');
 
-        if ($package_id <= 0 || $new_item_id <= 0 || $reference <= 0 || $ship_date === '' || $trailer === '' || $address === '' || $zip <= 0 || $city === '' || $state === '') {
+
+        if (!is_array($new_item_id)) {
+            $new_item_id = [$new_item_id];
+        }
+
+        $new_item_id = array_values(array_unique(array_filter(array_map('intval', $new_item_id), function ($value) {
+            return $value > 0;
+        })));
+
+        if ($package_id <= 0 || empty($new_item_id) || $reference <= 0 || $ship_date === '' || $trailer === '' || $address === '' || $zip <= 0 || $city === '' || $state === '') {
             header("Location: ../APIs/orders-update.php?id=$package_id&status=add-failed");
             exit;
         }
@@ -677,30 +602,63 @@
             exit;
         }
 
-        $check_stmt = $connection->prepare("SELECT id FROM order_list WHERE item_id=? AND reference_numb=? AND ship_date=? AND trailer_name=? AND address=? AND zip_code=? AND city=? AND state=? LIMIT 1");
-        $check_stmt->bind_param("iiss", $new_item_id, $reference, $ship_date, $trailer);
-        $check_stmt->execute();
-        $check_result = $check_stmt->get_result();
+        $check_stmt = $connection->prepare("SELECT 
+                                            id
+                                            FROM order_list 
+                                            WHERE item_id=? 
+                                            AND reference_numb=? 
+                                            AND ship_date=? 
+                                            AND trailer_name=? 
+                                            AND address=? 
+                                            AND zip_code=? 
+                                            AND city=? 
+                                            AND state=? 
+                                            LIMIT 1");
 
-        if ($check_result && $check_result->num_rows > 0) {
-            header("Location: ../APIs/orders-update.php?id=$package_id&status=add-duplicate");
-            exit;
+        $insert_stmt = $connection->prepare("INSERT INTO 
+                                            order_list (item_id,
+                                                        package_id,
+                                                        reference_numb, 
+                                                        ship_date, 
+                                                        trailer_name, 
+                                                        address, 
+                                                        zip_code, 
+                                                        city,
+                                                        state,
+                                                        status) 
+                                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'draft')");
+
+        $inserted_count = 0;
+        $duplicate_count = 0;
+
+        foreach ($new_item_id as $item_id) {
+            $check_stmt->bind_param("iisssiss", $item_id, $reference, $ship_date, $trailer, $address, $zip, $city, $state);
+            $check_stmt->execute();
+            $check_result = $check_stmt->get_result();
+
+            if ($check_result && $check_result->num_rows > 0) {
+                $duplicate_count++;
+                continue;
+            }
+
+            $insert_stmt->bind_param("iiisssiss", $item_id, $internal_package_id, $reference, $ship_date, $trailer, $address, $zip, $city, $state);
+            if ($insert_stmt->execute()) {
+                $inserted_count++;
+            }
+
+            $stmt= $connection->prepare("UPDATE inventory_item_info SET `location`='shipping' WHERE inventory_id=?");
+            $stmt->bind_param("i", $item_id);
+            $stmt->execute();
         }
 
-       foreach ($new_item_id as $item_id) {
-            $insert_stmt = $connection->prepare("INSERT INTO order_list (item_id, reference_numb, ship_date, trailer_name, address, zip_code, city, state, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'draft')");
-            $insert_stmt->bind_param("iisssiss", $item_id, $reference, $ship_date, $trailer, $address, $zip, $city, $state);
-        }
-
-        if ($insert_stmt->execute()) {
+        if ($inserted_count > 0) {
             header("Location: ../APIs/orders-update.php?id=$package_id&status=add-success");
             exit;
         }
 
-        foreach ($new_item_id as $item_id) {
-            $stmt= $connection->prepare("UPDATE inventory_item_info SET `location`='shipping' WHERE inventory_id=?");
-            $stmt->bind_param("i", $new_item_id);
-            $stmt->execute();
+        if ($duplicate_count > 0) {
+            header("Location: ../APIs/orders-update.php?id=$package_id&status=add-duplicate");
+            exit;
         }
 
         header("Location: ../APIs/orders-update.php?id=$package_id&status=add-failed");
@@ -728,7 +686,7 @@
         $stmt->execute();
 
         $stmt = $connection->prepare("DELETE FROM order_list WHERE id=? AND status='draft'");
-        $stmt->bind_param("i", $mpl_item_id);
+        $stmt->bind_param("i", $order_item_id);
 
         if ($stmt->execute() && $stmt->affected_rows > 0) {
             header("Location: ../APIs/orders-update.php?id=$package_id&status=remove-success");
