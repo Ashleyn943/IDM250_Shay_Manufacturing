@@ -129,7 +129,7 @@
 
     //send MPL item to other team (draft -> pending)
     if (isset($_POST['send_mpl_btn'])) {
-        $mpl_id = intval($_POST['mpl_id'] ?? 0);
+        $mpl_id = intval($_POST['send_mpl_id'] ?? 0);
 
         if ($mpl_id <= 0) {
             header("Location: ../mpl_items.php?status=send-failed");
