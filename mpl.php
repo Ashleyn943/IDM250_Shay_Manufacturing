@@ -35,7 +35,7 @@
         <form method="POST" action="library/cms.php">
             <div class="form-group">
                 <label for="reference">Reference Number</label>
-                <input type="number" id="reference" name="reference" required>
+                <input type="number" id="reference" name="reference" pattern="/^-?\d+\.?\d*$/" onKeyPress="if(this.value.length==7) return false;" required>
             </div>
             <div class="form-group">
                 <label for="date">Expected Arrival Date:</label>

@@ -157,9 +157,6 @@
                                     echo "<a href='APIs/mpl-delete.php?id=" . urlencode($item['id']) . "' onclick=\"return confirm('Delete this MPL item?')\">Delete</a>";
                                 }
 
-                                if (($item['status'] ?? '') === 'pending') {
-                                    echo " | <a href='library/cms.php?accept_mpl_id=" . urlencode($item['id']) . "' onclick=\"return confirm('Mark this MPL item as accepted?')\">Accept</a>";
-                                }
 
                                 echo "</td>";
                                 echo "</tr>";
